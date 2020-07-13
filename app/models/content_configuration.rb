@@ -71,7 +71,8 @@ class ContentConfiguration < Spree::Preferences::FileConfiguration
     [Calendar](/)
   EOS
 
-  preference :footer_about_url, :string, default: "http://www.openfoodnetwork.org/ofn-local/open-food-network-australia/"
+#  preference :footer_about_url, :string, default: "http://www.openfoodnetwork.org/ofn-local/open-food-network-australia/" # commented by NTD 06-15-2020
+  preference :footer_about_url, :string, default: "https://www.hoosierfoodmarket.com/assets/HFM/about"
 
   # User Guide
   preference :user_guide_link, :string, default: 'https://guide.openfoodnetwork.org/'
