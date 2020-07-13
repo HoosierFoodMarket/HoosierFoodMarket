@@ -13,22 +13,22 @@ class CheckoutController < Spree::StoreController
 
   # We need pessimistic locking to avoid race conditions.
   # Otherwise we fail on duplicate indexes or end up with negative stock.
-  prepend_around_filter CurrentOrderLocker, only: :update
+  prepend_around_action CurrentOrderLocker, only: :update
 
-  prepend_before_filter :check_hub_ready_for_checkout
-  prepend_before_filter :check_order_cycle_expiry
-  prepend_before_filter :require_order_cycle
-  prepend_before_filter :require_distributor_chosen
+  prepend_before_action :check_hub_ready_for_checkout
+  prepend_before_action :check_order_cycle_expiry
+  prepend_before_action :require_order_cycle
+  prepend_before_action :require_distributor_chosen
 
-  before_filter :load_order
+  before_action :load_order
 
-  before_filter :ensure_order_not_completed
-  before_filter :ensure_checkout_allowed
-  before_filter :ensure_sufficient_stock_lines
+  before_action :ensure_order_not_completed
+  before_action :ensure_checkout_allowed
+  before_action :ensure_sufficient_stock_lines
 
-  before_filter :associate_user
-  before_filter :check_authorization
-  before_filter :enable_embedded_shopfront
+  before_action :associate_user
+  before_action :check_authorization
+  before_action :enable_embedded_shopfront
 
   helper 'spree/orders'
 
@@ -40,12 +40,12 @@ class CheckoutController < Spree::StoreController
     # This is only required because of spree_paypal_express. If we implement
     # a version of paypal that uses this controller, and more specifically
     # the #update_failed method, then we can remove this call
-    RestartCheckout.new(@order).call
+    OrderCheckoutRestart.new(@order).call
   end
 
   def update
-    params_adapter = Checkout::FormDataAdapter.new(params, @order, spree_current_user)
-    return update_failed unless @order.update_attributes(params_adapter.order_params)
+    params_adapter = Checkout::FormDataAdapter.new(permitted_params, @order, spree_current_user)
+    return update_failed unless @order.update(params_adapter.params[:order])
 
     fire_event('spree.checkout.update')
 
@@ -91,6 +91,7 @@ class CheckoutController < Spree::StoreController
 
     redirect_to(main_app.shop_path) && return if redirect_to_shop?
     redirect_to_cart_path && return unless valid_order_line_items?
+
     before_address
     setup_for_current_state
   end
@@ -240,7 +241,7 @@ class CheckoutController < Spree::StoreController
   def update_failed(error = RuntimeError.new(order_error))
     Bugsnag.notify(error)
 
-    flash[:error] = order_error if flash.empty?
+    flash[:error] = order_error if flash.blank?
     checkout_failed
     update_failed_response
   end
@@ -258,5 +259,9 @@ class CheckoutController < Spree::StoreController
         render json: { errors: @order.errors, flash: flash.to_hash }.to_json, status: :bad_request
       end
     end
+  end
+
+  def permitted_params
+    PermittedAttributes::Checkout.new(params).call
   end
 end

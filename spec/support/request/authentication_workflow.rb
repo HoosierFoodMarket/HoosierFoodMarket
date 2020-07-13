@@ -6,7 +6,7 @@ module AuthenticationWorkflow
   end
 
   def quick_login_as_admin
-    admin_role = Spree::Role.find_or_create_by_name!('admin')
+    admin_role = Spree::Role.find_or_create_by!(name: 'admin')
     admin_user = create(:user,
                         password: 'passw0rd',
                         password_confirmation: 'passw0rd',
@@ -26,9 +26,14 @@ module AuthenticationWorkflow
 
   # TODO: Should probably just rename this to create_user
   def create_enterprise_user( attrs = {} )
-    new_user = create(:user, attrs)
-    new_user.spree_roles = [] # for some reason unbeknown to me, this new user gets admin permissions by default.
+    new_user = build(:user, attrs)
+    new_user.spree_roles = [Spree::Role.find_or_create_by!(name: 'user')]
     new_user.save
+    if attrs.key? :enterprises
+      attrs[:enterprises].each do |enterprise|
+        enterprise.users << new_user
+      end
+    end
     new_user
   end
 
@@ -41,33 +46,15 @@ module AuthenticationWorkflow
     # click_button 'Login'
   end
 
-  def login_to_consumer_section
-    user_role = Spree::Role.find_or_create_by_name!('user')
-    user = create_enterprise_user(
-      email: 'someone@ofn.org',
-      password: 'passw0rd',
-      password_confirmation: 'passw0rd',
-      remember_me: false,
-      persistence_token: 'pass',
-      login: 'someone@ofn.org'
-    )
-
-    user.spree_roles << user_role
-
-    visit spree.login_path
-    fill_in_and_submit_login_form user
-  end
-
   def fill_in_and_submit_login_form(user)
     fill_in "email", with: user.email
     fill_in "password", with: user.password
     click_button "Login"
   end
 
-  def use_api_as_unauthenticated_user
-    allow_any_instance_of(Api::BaseController).to receive(:spree_current_user) {
-      Spree::User.anonymous!
-    }
+  def expect_logged_in
+    # Ensure page has been reloaded after submitting login form
+    expect(page).to_not have_selector ".menu #login-link"
   end
 end
 

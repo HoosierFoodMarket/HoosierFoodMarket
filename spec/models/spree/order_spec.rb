@@ -3,6 +3,42 @@ require 'spec_helper'
 describe Spree::Order do
   include OpenFoodNetwork::EmailHelper
 
+  describe "email validation" do
+    let(:order) { build(:order) }
+
+    it "has errors if email is blank" do
+      order.stub(require_email: true)
+      order.email = ""
+
+      order.valid?
+      expect(order.errors[:email]).to eq ["can't be blank", "is invalid"]
+    end
+
+    it "has errors if email is invalid" do
+      order.stub(require_email: true)
+      order.email = "invalid_email"
+
+      order.valid?
+      expect(order.errors[:email]).to eq ["is invalid"]
+    end
+
+    it "has errors if email has invalid domain" do
+      order.stub(require_email: true)
+      order.email = "single_letter_tld@domain.z"
+
+      order.valid?
+      expect(order.errors[:email]).to eq ["is invalid"]
+    end
+
+    it "is valid if email is valid" do
+      order.stub(require_email: true)
+      order.email = "a@b.ca"
+
+      order.valid?
+      expect(order.errors[:email]).to eq []
+    end
+  end
+
   describe "setting variant attributes" do
     it "sets attributes on line items for variants" do
       d = create(:distributor_enterprise)
@@ -248,70 +284,6 @@ describe Spree::Order do
     it "returns a sum of all tax on the order" do
       # 12 = 2 (of the enterprise fee adjustment) + 10 (of the shipment adjustment)
       expect(order.total_tax).to eq(12)
-    end
-  end
-
-  describe "getting a hash of all taxes" do
-    let(:zone)            { create(:zone_with_member) }
-    let(:coordinator)     { create(:distributor_enterprise, charges_sales_tax: true) }
-
-    let(:tax_rate10)      { create(:tax_rate, included_in_price: true, calculator: Spree::Calculator::DefaultTax.new, amount: 0.1, zone: zone) }
-    let(:tax_rate15)      { create(:tax_rate, included_in_price: true, calculator: Spree::Calculator::DefaultTax.new, amount: 0.15, zone: zone) }
-    let(:tax_rate20)      { create(:tax_rate, included_in_price: true, calculator: Spree::Calculator::DefaultTax.new, amount: 0.2, zone: zone) }
-    let(:tax_rate25)      { create(:tax_rate, included_in_price: true, calculator: Spree::Calculator::DefaultTax.new, amount: 0.25, zone: zone) }
-    let(:tax_category10)  { create(:tax_category, tax_rates: [tax_rate10]) }
-    let(:tax_category15)  { create(:tax_category, tax_rates: [tax_rate15]) }
-    let(:tax_category20)  { create(:tax_category, tax_rates: [tax_rate20]) }
-    let(:tax_category25)  { create(:tax_category, tax_rates: [tax_rate25]) }
-
-    let(:variant)         { create(:variant, product: create(:product, tax_category: tax_category10)) }
-    let(:enterprise_fee)  { create(:enterprise_fee, enterprise: coordinator, tax_category: tax_category20, calculator: Spree::Calculator::FlatRate.new(preferred_amount: 48.0)) }
-    let(:additional_adjustment) { create(:adjustment, amount: 50.0, included_tax: tax_rate25.compute_tax(50.0)) }
-
-    let(:order_cycle)     { create(:simple_order_cycle, coordinator: coordinator, coordinator_fees: [enterprise_fee], distributors: [coordinator], variants: [variant]) }
-    let(:line_item)       { create(:line_item, variant: variant, price: 44.0) }
-    let(:order) do
-      create(
-        :order,
-        line_items: [line_item],
-        bill_address: create(:address),
-        order_cycle: order_cycle,
-        distributor: coordinator,
-        adjustments: [additional_adjustment]
-      )
-    end
-
-    before do
-      allow(Spree::Config).to receive(:shipment_inc_vat).and_return(true)
-      allow(Spree::Config).to receive(:shipping_tax_rate).and_return(tax_rate15.amount)
-    end
-
-    let(:shipping_method) { create(:shipping_method, calculator: Spree::Calculator::FlatRate.new(preferred_amount: 46.0)) }
-    let!(:shipment) { create(:shipment_with, :shipping_method, shipping_method: shipping_method, order: order) }
-
-    before do
-      order.create_tax_charge!
-      order.update_distribution_charge!
-    end
-
-    it "returns a hash with all 3 taxes" do
-      expect(order.tax_adjustment_totals.size).to eq(4)
-    end
-
-    it "contains tax on line_item" do
-      expect(order.tax_adjustment_totals[tax_rate10]).to eq(4.0)
-    end
-
-    it "contains tax on shipping_fee" do
-      expect(order.tax_adjustment_totals[tax_rate15]).to eq(6.0)
-    end
-
-    it "contains tax on enterprise_fee" do
-      expect(order.tax_adjustment_totals[tax_rate20]).to eq(8.0)
-    end
-
-    it "contains tax on order adjustment" do
-      expect(order.tax_adjustment_totals[tax_rate25]).to eq(10.0)
     end
   end
 
@@ -686,7 +658,7 @@ describe Spree::Order do
         end
 
         it "does not attempt to update such adjustments" do
-          order.update_attributes(line_items_attributes: [{ id: order.line_items.first.id, quantity: 0 }])
+          order.update(line_items_attributes: [{ id: order.line_items.first.id, quantity: 0 }])
 
           # Check if fees got updated
           order.reload
@@ -713,7 +685,7 @@ describe Spree::Order do
 
       it "removes transaction fees" do
         # Change the payment method
-        order.payments.first.update_attributes(payment_method_id: payment_method.id)
+        order.payments.first.update(payment_method_id: payment_method.id)
         order.save
 
         # Check if fees got updated
@@ -808,7 +780,7 @@ describe Spree::Order do
       let!(:order_cycle) { proxy_order.order_cycle }
 
       context "and order_cycle has no order_close_at set" do
-        before { order.order_cycle.update_attributes(orders_close_at: nil) }
+        before { order.order_cycle.update(orders_close_at: nil) }
 
         it "requires a payment" do
           expect(order.payment_required?).to be true
@@ -816,7 +788,7 @@ describe Spree::Order do
       end
 
       context "and the order_cycle has closed" do
-        before { order.order_cycle.update_attributes(orders_close_at: 5.minutes.ago) }
+        before { order.order_cycle.update(orders_close_at: 5.minutes.ago) }
 
         it "returns the payments on the order" do
           expect(order.payment_required?).to be true
@@ -824,7 +796,7 @@ describe Spree::Order do
       end
 
       context "and the order_cycle has not yet closed" do
-        before { order.order_cycle.update_attributes(orders_close_at: 5.minutes.from_now) }
+        before { order.order_cycle.update(orders_close_at: 5.minutes.from_now) }
 
         it "returns an empty array" do
           expect(order.payment_required?).to be false

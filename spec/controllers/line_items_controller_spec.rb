@@ -41,13 +41,6 @@ describe LineItemsController, type: :controller do
 
       before { allow(controller).to receive_messages spree_current_user: item.order.user }
 
-      context "without a line item id" do
-        it "fails and raises an error" do
-          delete :destroy
-          expect(response.status).to eq 404
-        end
-      end
-
       context "with a line item id" do
         let(:params) { { format: :json, id: item } }
 
@@ -139,7 +132,7 @@ describe LineItemsController, type: :controller do
       let!(:exchange) { create(:exchange, incoming: true, sender: variant.product.supplier, receiver: order_cycle.coordinator, variants: [variant], enterprise_fees: [enterprise_fee]) }
       let!(:order) do
         order = create(:completed_order_with_totals, user: user, distributor: distributor, order_cycle: order_cycle, line_items_count: 1)
-        order.reload.line_items.first.update_attributes(variant_id: variant.id)
+        order.reload.line_items.first.update(variant_id: variant.id)
         while !order.completed? do break unless order.next! end
         order.update_distribution_charge!
         order

@@ -4,8 +4,8 @@ module Api
   class ShipmentsController < Api::BaseController
     respond_to :json
 
-    before_filter :find_order
-    before_filter :find_and_update_shipment, only: [:ship, :ready, :add, :remove]
+    before_action :find_order
+    before_action :find_and_update_shipment, only: [:ship, :ready, :add, :remove]
 
     def create
       variant = scoped_variant(params[:variant_id])
@@ -22,7 +22,7 @@ module Api
 
     def update
       authorize! :read, Spree::Shipment
-      @shipment = @order.shipments.find_by_number!(params[:id])
+      @shipment = @order.shipments.find_by!(number: params[:id])
       params[:shipment] ||= []
       unlock = params[:shipment].delete(:unlock)
 
@@ -30,7 +30,7 @@ module Api
         @shipment.adjustment.open
       end
 
-      @shipment.update_attributes(params[:shipment])
+      @shipment.update(params[:shipment])
 
       if unlock == 'yes'
         @shipment.adjustment.close
@@ -82,13 +82,13 @@ module Api
     private
 
     def find_order
-      @order = Spree::Order.find_by_number!(params[:order_id])
+      @order = Spree::Order.find_by!(number: params[:order_id])
       authorize! :read, @order
     end
 
     def find_and_update_shipment
-      @shipment = @order.shipments.find_by_number!(params[:id])
-      @shipment.update_attributes(params[:shipment])
+      @shipment = @order.shipments.find_by!(number: params[:id])
+      @shipment.update(params[:shipment])
       @shipment.reload
     end
 

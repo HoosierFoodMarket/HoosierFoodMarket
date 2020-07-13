@@ -3,14 +3,14 @@ require 'open_food_network/error_logger'
 class UserRegistrationsController < Spree::UserRegistrationsController
   I18N_SCOPE = 'devise.user_registrations.spree_user'.freeze
 
-  before_filter :set_checkout_redirect, only: :create
+  before_action :set_checkout_redirect, only: :create
 
   include I18nHelper
-  before_filter :set_locale
+  before_action :set_locale
 
   # POST /resource/sign_up
   def create
-    @user = build_resource(params[:spree_user])
+    @user = build_resource(spree_user_params)
     @user.locale = I18n.locale.to_s
     unless resource.save
       return render_error(@user.errors)
@@ -31,6 +31,12 @@ class UserRegistrationsController < Spree::UserRegistrationsController
   end
 
   private
+
+  def spree_user_params
+    return params[:spree_user] if params[:spree_user].blank?
+
+    PermittedAttributes::User.new(params, :spree_user).call([:remember_me])
+  end
 
   def render_error(errors = {})
     clean_up_passwords(resource)

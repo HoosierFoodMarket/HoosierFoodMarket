@@ -65,8 +65,8 @@ describe OrderCycle do
     oc_received = create(:simple_order_cycle, distributors: [e2])
     oc_not_accessible = create(:simple_order_cycle, coordinator: e1)
 
-    expect(OrderCycle.accessible_by(user)).to include(oc_coordinated, oc_sent, oc_received)
-    expect(OrderCycle.accessible_by(user)).not_to include(oc_not_accessible)
+    expect(OrderCycle.visible_by(user)).to include(oc_coordinated, oc_sent, oc_received)
+    expect(OrderCycle.visible_by(user)).not_to include(oc_not_accessible)
   end
 
   it "finds the most recently closed order cycles" do
@@ -319,7 +319,7 @@ describe OrderCycle do
     end
 
     it "reports status when an order cycle is undated" do
-      oc.update_attributes!(orders_open_at: nil, orders_close_at: nil)
+      oc.update!(orders_open_at: nil, orders_close_at: nil)
 
       expect(oc).to     be_undated
       expect(oc).not_to be_dated
@@ -329,7 +329,7 @@ describe OrderCycle do
     end
 
     it "reports status when an order cycle is partially dated - opening time only" do
-      oc.update_attributes!(orders_close_at: nil)
+      oc.update!(orders_close_at: nil)
 
       expect(oc).to     be_undated
       expect(oc).not_to be_dated
@@ -339,7 +339,7 @@ describe OrderCycle do
     end
 
     it "reports status when an order cycle is partially dated - closing time only" do
-      oc.update_attributes!(orders_open_at: nil)
+      oc.update!(orders_open_at: nil)
 
       expect(oc).to     be_undated
       expect(oc).not_to be_dated
@@ -421,11 +421,11 @@ describe OrderCycle do
     let!(:oc3) { create(:simple_order_cycle, orders_close_at: time3, distributors: [e2]) }
 
     it "returns the closing time, indexed by enterprise id" do
-      expect(OrderCycle.earliest_closing_times[e1.id]).to eq(time1)
+      expect(OrderCycle.earliest_closing_times[e1.id].round).to eq(time1.round)
     end
 
     it "returns the earliest closing time" do
-      expect(OrderCycle.earliest_closing_times[e2.id]).to eq(time2)
+      expect(OrderCycle.earliest_closing_times[e2.id].round).to eq(time2.round)
     end
   end
 

@@ -69,7 +69,6 @@ module Api
 
         it "retrieves a list of orders with appropriate attributes,
             including line items with appropriate attributes" do
-
           returns_orders(json_response)
         end
 
@@ -165,7 +164,7 @@ module Api
         before { allow(controller).to receive(:spree_current_user) { admin_user } }
 
         it "when no order number is given" do
-          get :show, id: nil
+          get :show, id: ""
           expect(response).to have_http_status(:not_found)
         end
 
@@ -213,7 +212,7 @@ module Api
         before { allow(controller).to receive(:spree_current_user) { order.distributor.owner } }
 
         it "can view an order not in a standard state" do
-          order.update_attributes(completed_at: nil, state: 'shipped')
+          order.update(completed_at: nil, state: 'shipped')
           get :show, id: order.number
           expect_order
         end

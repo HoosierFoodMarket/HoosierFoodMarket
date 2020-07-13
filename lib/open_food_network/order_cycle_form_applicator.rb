@@ -83,7 +83,7 @@ module OpenFoodNetwork
 
       remove_unauthorized_exchange_attributes(exchange, attrs)
       variant_ids = attrs.delete :variant_ids
-      exchange.update_attributes!(attrs)
+      exchange.update!(attrs)
       ExchangeVariantBulkUpdater.new(exchange).update!(variant_ids) unless variant_ids.nil?
 
       @touched_exchanges << exchange
@@ -141,7 +141,8 @@ module OpenFoodNetwork
     end
 
     def find_exchange(sender_id, receiver_id, incoming)
-      @order_cycle.exchanges.find_by_sender_id_and_receiver_id_and_incoming(sender_id, receiver_id, incoming)
+      @order_cycle.exchanges.
+        find_by(sender_id: sender_id, receiver_id: receiver_id, incoming: incoming)
     end
 
     def incoming_exchange_variant_ids(attrs)

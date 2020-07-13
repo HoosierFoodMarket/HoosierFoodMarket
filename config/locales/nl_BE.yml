@@ -23,6 +23,8 @@ nl_BE:
         base: "Kredietkaart"
       order_cycle:
         orders_close_at: Sluitingsdatum
+      variant_override:
+        count_on_hand: "Bij de Hand"
     errors:
       models:
         spree/user:
@@ -170,8 +172,7 @@ nl_BE:
         title: Andere mislukking (%{count}orders)
         explainer: De automatische verwerking van deze bestellingen is om een onbekende reden mislukt. Dit mag niet gebeuren, neem contact met ons op als u dit ziet.
   home: "OFN"
-  title: Open Food Network
-  welcome_to: 'Welkom op '
+  title: "Open Food Network"
   site_meta_description: "Dit is wat we doen door een platform te creëren dat verbinding wil maken:\n● gepassioneerde boeren, die zich inzetten voor duurzame en regeneratieve landbouw,\n● handelaren van lokale producten, aanhangers van kortsluitingen, die in volledige transparantie handelen en een eerlijke vergoeding van de producenten garanderen,\n● kopers die de wereld willen veranderen door beter te eten,"
   search_by_name: Zoeken op naam of voorstad....
   producers_join: Belgische producenten zijn nu welkom om zich aan te sluiten bij het Open Food Network.
@@ -255,6 +256,7 @@ nl_BE:
   back_to_payments_list: "Terug naar Betalingslijst"
   on hand: "Bij de Hand"
   ship: "Verzenden"
+  shipping_category: "Verzendcategorie"
   actions:
     create_and_add_another: "Een ander maken en toevoegen"
     create: "Maak"
@@ -354,7 +356,6 @@ nl_BE:
         title: "Matomo instellingen"
         matomo_url: "Matomo URL"
         matomo_site_id: "Matomo Site ID"
-        info_html: "Matomo is een Web en Mobile Analytics. U kunt Matomo on-premises hosten of gebruik maken van een cloud-hosted service. Zie <a href='http://matomo.org' target='_blank'>matomo.org</a> voor meer informatie."
         config_instructions_html: "Hier kunt u de OFN Matomo integratie configureren. De Matomo URL hieronder zou moeten verwijzen naar de Matomo instantie waar de gebruiker tracking informatie naartoe wordt gestuurd; als deze leeg wordt gelaten, wordt Matomo gebruiker tracking uitgeschakeld. Het veld Site ID is niet verplicht, maar handig als je meer dan één website volgt op één Matomo instance; het is te vinden op de Matomo instance console. Vertaald met www.DeepL.com/Translator"
     customers:
       index:
@@ -389,6 +390,7 @@ nl_BE:
         footer_and_external_links: Voettekst en externe links
         your_content: Uw inhoud
         user_guide: Gebruikershandleiding
+        map: Kaart
     enterprise_fees:
       index:
         title: "Ondernemingsvergoedingen"
@@ -668,12 +670,11 @@ nl_BE:
           ofn_uid: OFN UID
           ofn_uid_tip: Het unieke ID dat wordt gebruikt om de onderneming in Open Food Network te identificeren.
         shipping_methods:
-          name: Naam
-          applies: Van toepassing?
-          manage: Beheer Verzendmethodes
-          create_button: Creëer Nieuwe Verzendmethodes
-          create_one_button: Creëer er nu één
-          no_method_yet: Je hebt nog geen verzendmethodes.
+          name: "Naam"
+          manage: "Beheer Verzendmethodes"
+          create_button: "Creëer Nieuwe Verzendmethodes"
+          create_one_button: "Creëer er nu één"
+          no_method_yet: "Je hebt nog geen verzendmethodes."
         shop_preferences:
           shopfront_requires_login: "Publiekelijk zichtbare etalage"
           shopfront_requires_login_tip: "Kies of je klanten ingelogd moeten zijn om je etalage te bekijken of kies om je etalage zichtbaar te maken voor iedereen."
@@ -1101,13 +1102,13 @@ nl_BE:
     menu:
       cart:
         cart: "kar"
+      cart_sidebar:
+        checkout: "Kassa"
+        close: "Sluit"
       signed_in:
         profile: "Profiel"
       mobile_menu:
         cart: "kar"
-      joyride:
-        checkout: "Naar de kassa"
-        already_ordered_products: "Reeds besteld in de huidige bestelcyclus"
     register_call:
       selling_on_ofn: "Geïnteresseerd om deel uit te maken van het Open Food Network?"
       register: "Registreer hier"
@@ -1130,12 +1131,12 @@ nl_BE:
       footer_data_cookies_policy: "cookie policy"
   shop:
     messages:
-      login: "login"
-      signup: "inschrijven"
-      contact: "contact"
-      require_customer_login: "Alleen goedgekeurde klanten hebben toegang tot deze winkel. "
-      require_login_html: "Als u al een goedgekeurde klant bent %{login} of %{signup} wilt doorgaan. Wil je hier beginnen met winkelen? Alstublieft %{contact}en%{enterprise} vragen over meedoen."
-      require_customer_html: "Als u hier wilt beginnen met winkelen, kunt u vragen of %{contact}%{enterprise}u lid wilt worden."
+      customer_required:
+        login: "login"
+        signup: "inschrijven"
+        contact: "contact"
+        require_customer_login: "Alleen goedgekeurde klanten hebben toegang tot deze winkel. "
+        require_customer_html: "Als u hier wilt beginnen met winkelen, kunt u vragen of %{contact}%{enterprise}u lid wilt worden."
   card_could_not_be_updated: De bankkaart kon niet worden geüpdatet.
   card_could_not_be_saved: De bankkaart kon niet worden bewaard.
   spree_gateway_error_flash_for_checkout: "Er was een probleem met betaalinformatie: %{error}"
@@ -1491,11 +1492,13 @@ nl_BE:
     one: Je bestelling bij <a href='%{path}' target='_blank'>%{shop}/%{order}</a> wordt op dit moment nagekeken. Je kan veranderingen maken tot %{oc_close}.
     other: Je hebt <a href='%{path}' target='_blank'>%{count} bestellingen bij %{shop}</a>die op dit moment nog open staan voor nazicht. Je kan aanpassingen maken tot %{oc_close}.
   orders_changeable_orders_alert_html: Deze bestelling is bevestigd, maar je kan aanpassingen maken tot <strong>%{oc_close}</strong>.
-  products_clear_all: Wis alles
+  products_clear: Duidelijk
   products_showing: "Toont:"
-  products_or: "OF"
+  products_or: "of"
   products_with: met
-  products_search: "Zoek op producten of producenten"
+  products_filter_by: "Sorteer op"
+  products_filter_selected: "Geselecteerd"
+  products_filter_clear: "Duidelijk"
   products_loading: "Laad producten..."
   products_updating_cart: "winkelwagentje wordt geüpdatet..."
   products_cart_empty: "Winkelwagentje is leeg"
@@ -1645,8 +1648,7 @@ nl_BE:
   password: Wachtwoord
   remember_me: Onthoud Me
   are_you_sure: "Ben je zeker?"
-  orders_open: Openstaande Bestellingen
-  closing: "Sluitend"
+  orders_open: "Openstaande Bestellingen"
   going_back_to_home_page: "Terugkerend naar de startpagina"
   creating: Aanmakend
   updating: Updatend
@@ -2622,6 +2624,7 @@ nl_BE:
   previous: "Voorgaande"
   last: "Laatst"
   spree:
+    more: "Meer"
     your_order_is_empty_add_product: "Je bestelling is leeg, gelieve hierboven  een product te zoeken en toe te voegen "
     add_product: "Voeg een product toe"
     name_or_sku: "Beschrijving of artikelnummer ( tenminste 4 letters van de productnaam invoeren )"
@@ -2666,6 +2669,8 @@ nl_BE:
     new_payment: "Nieuwe betaling"
     capture: "Capture"
     void: "leegte"
+    login: "Log in"
+    password: "Wachtwoord"
     configurations: "configuraties "
     general_settings: "Algemene instellingen"
     site_name: "Website Naam"
@@ -2730,8 +2735,6 @@ nl_BE:
     abbreviation: "Afkortingen "
     new_state: "Nieuw Provincie"
     payment_methods: "Betalingsmethode"
-    new_payment_method: "Nieuwe betalingswijze"
-    provider: "Leverancier"
     taxonomies: "Taxonomies "
     new_taxonomy: "Nieuwe taxonomie "
     back_to_taxonomies_list: "Terug naar de lijst Taxonomies"
@@ -2884,9 +2887,6 @@ nl_BE:
           zone: "Zone"
           calculator: "Rekenmachine"
           display: "Display"
-          both: "Beide"
-          front_end: "Voorkant"
-          back_end: "Back End"
           no_shipping_methods_found: "Geen verzendmethoden gevonden"
         new:
           new_shipping_method: "New Shipping Method"
@@ -2898,14 +2898,24 @@ nl_BE:
         form:
           categories: "Categorieën"
           zones: "Zones "
-          both: "Beide"
-          front_end: "Voorkant"
-          back_end: "Back End"
       payment_methods:
+        index:
+          payment_methods: "Betalingsmethode"
+          new_payment_method: "Nieuwe betalingswijze"
+          name: "Naam"
+          products_distributor: "Distributeur"
+          provider: "Leverancier"
+          environment: "Omgeving"
+          display: "Display"
+          active: "Aktief"
+          both: "Beide"
+          active_yes: "Ya"
+          active_no: "Néé"
         new:
           new_payment_method: "Nieuwe betalingswijze"
           back_to_payment_methods_list: "Terug naar de lijst van de betalingswijzes"
         edit:
+          new: "Nieuw"
           editing_payment_method: "Wijziging van de betalingswijze"
           back_to_payment_methods_list: "Terug naar de lijst van de betalingswijzes"
         stripe_connect:
@@ -2921,6 +2931,17 @@ nl_BE:
           account_id: Account ID
           business_name: Bedrijfsnaam
           charges_enabled: Kosten ingeschakeld
+        form:
+          name: "Naam"
+          description: "Beschrijving"
+          environment: "Omgeving"
+          display: "Display"
+          active: "Aktief"
+          active_yes: "Ya"
+          active_no: "Néé"
+          tags: "Tags"
+        providers:
+          provider: "Leverancier"
       payments:
         source_forms:
           stripe:
@@ -3010,11 +3031,19 @@ nl_BE:
           price: "Prijs"
           display_as: "Weergeven als"
         autocomplete:
+          out_of_stock: "Geen voorraad"
           producer_name: "Producent"
           unit: "Unit"
       shared:
         sortable_header:
           name: "Naam"
+          number: "Nummer"
+          state: "Staat"
+          payment_state: "Status Betaling"
+          shipment_state: "Status Verzending"
+          email: "E-mail"
+          total: "Totaal"
+      general_settings:
         edit:
           legal_settings: "De legale instelling"
           cookies_consent_banner_toggle: "Laat de strook met uw akkoord voor de cookies zien"
@@ -3040,7 +3069,6 @@ nl_BE:
       format: '%Y-%m-%d'
       js_format: 'yy-mm-dd'
     orders:
-      error_flash_for_unavailable_items: "Een gegeven op je kaart is onbereikbaar."
       edit:
         login_to_view_order: "Gelieve U te connecteren om uw bestelling te zien."
       bought:
@@ -3068,9 +3096,6 @@ nl_BE:
       invalid: fout
     order_mailer:
       cancel_email:
-        customer_greeting: "Hello%{name}!"
-        instructions: "Uw bestelling is GEANNULEERD. Bewaar deze annuleringsinformatie voor uw administratie."
-        order_summary_canceled: "Overzicht van de bestelling [KANNELD]"
         subject: "Annulering van de bestelling"
       confirm_email:
         subject: "Bestellingsinformatie"

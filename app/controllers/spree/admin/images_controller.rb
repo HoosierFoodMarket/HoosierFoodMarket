@@ -6,7 +6,7 @@ module Spree
       # See here https://github.com/spree/spree/commit/334a011d2b8e16355e4ae77ae07cd93f7cbc8fd1
       belongs_to 'spree/product', find_by: :permalink
 
-      before_filter :load_data
+      before_action :load_data
 
       create.before :set_viewable
       update.before :set_viewable
@@ -19,7 +19,7 @@ module Spree
       end
 
       def load_data
-        @product = Product.find_by_permalink(params[:product_id])
+        @product = Product.find_by(permalink: params[:product_id])
         @variants = @product.variants.collect do |variant|
           [variant.options_text, variant.id]
         end
@@ -33,6 +33,12 @@ module Spree
 
       def destroy_before
         @viewable = @image.viewable
+      end
+
+      def permitted_resource_params
+        params.require(:image).permit(
+          :attachment, :viewable_id, :alt
+        )
       end
     end
   end

@@ -21,7 +21,7 @@ class LineItemSyncer
 
   def update_item_quantities(order)
     changed_subscription_line_items.each do |sli|
-      line_item = order.line_items.find_by_variant_id(sli.variant_id)
+      line_item = order.line_items.find_by(variant_id: sli.variant_id)
 
       if line_item.blank?
         order_update_issues.add(order, sli.variant.product_and_full_name)
@@ -64,8 +64,8 @@ class LineItemSyncer
 
   def update_quantity(line_item, sli)
     if line_item.quantity == sli.quantity_was
-      return line_item.update_attributes(quantity: sli.quantity,
-                                         skip_stock_check: skip_stock_check?(line_item.order))
+      return line_item.update(quantity: sli.quantity,
+                              skip_stock_check: skip_stock_check?(line_item.order))
     end
     line_item.quantity == sli.quantity
   end

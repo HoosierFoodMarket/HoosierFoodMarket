@@ -7,10 +7,10 @@ class EnterprisesController < BaseController
   include SerializerHelper
 
   # These prepended filters are in the reverse order of execution
-  prepend_before_filter :set_order_cycles, :require_distributor_chosen, :reset_order, only: :shop
+  prepend_before_action :set_order_cycles, :require_distributor_chosen, :reset_order, only: :shop
 
-  before_filter :clean_permalink, only: :check_permalink
-  before_filter :enable_embedded_shopfront
+  before_action :clean_permalink, only: :check_permalink
+  before_action :enable_embedded_shopfront
 
   respond_to :js, only: :permalink_checker
 
@@ -36,7 +36,7 @@ class EnterprisesController < BaseController
   end
 
   def check_permalink
-    if Enterprise.find_by_permalink params[:permalink]
+    if Enterprise.find_by permalink: params[:permalink]
       render(text: params[:permalink], status: :conflict) && return
     end
 
@@ -51,7 +51,7 @@ class EnterprisesController < BaseController
   private
 
   def set_enterprise
-    @enterprise = Enterprise.find_by_id(params[:id])
+    @enterprise = Enterprise.find_by(id: params[:id])
   end
 
   def clean_permalink
@@ -65,47 +65,13 @@ class EnterprisesController < BaseController
   def reset_order
     order = current_order(true)
 
-    reset_distributor(order, distributor)
-
-    reset_user_and_customer(order) if try_spree_current_user
-
-    reset_order_cycle(order, distributor)
-
-    order.save!
+    # reset_distributor must be called before any call to current_customer or current_distributor
+    order_cart_reset = OrderCartReset.new(order, params[:id])
+    order_cart_reset.reset_distributor
+    order_cart_reset.reset_other!(try_spree_current_user, current_customer)
   rescue ActiveRecord::RecordNotFound
     flash[:error] = I18n.t(:enterprise_shop_show_error)
     redirect_to shops_path
-  end
-
-  def distributor
-    @distributor ||= Enterprise.is_distributor.find_by_permalink(params[:id]) ||
-                     Enterprise.is_distributor.find(params[:id])
-  end
-
-  def reset_distributor(order, distributor)
-    if order.distributor && order.distributor != distributor
-      order.empty!
-      order.set_order_cycle! nil
-    end
-    order.distributor = distributor
-  end
-
-  def reset_user_and_customer(order)
-    order.associate_user!(spree_current_user) if order.user.blank? || order.email.blank?
-    order.__send__(:associate_customer) if order.customer.nil? # Only associates existing customers
-  end
-
-  def reset_order_cycle(order, distributor)
-    order_cycles = Shop::OrderCyclesList.new(distributor, current_customer).call
-    order.order_cycle = order_cycles.first if order_cycles.size == 1
-  end
-
-  def shop_order_cycles
-    if current_order_cycle
-      [current_order_cycle]
-    else
-      OrderCycle.not_closed.with_distributor(current_distributor)
-    end
   end
 
   def set_noindex_meta_tag

@@ -4,9 +4,8 @@
 
   - if no_open_order_cycles?
     = render partial: "shop/messages/closed_shop"
-
   - else
-    .row
-      .small-12.columns
-        = render partial: "shop/messages/select_oc"
-        = render partial: "shop/products/form"
+    = render partial: "shop/messages/select_oc"
+
+  -# Rendering the form, even if there are no open OCs, makes display only shops possible
+  = render partial: "shop/products/form"

@@ -4,14 +4,14 @@ require 'open_food_network/scope_variant_to_hub'
 
 module Admin
   class SubscriptionLineItemsController < ResourceController
-    before_filter :load_build_context, only: [:build]
-    before_filter :ensure_shop, only: [:build]
-    before_filter :ensure_variant, only: [:build]
+    before_action :load_build_context, only: [:build]
+    before_action :ensure_shop, only: [:build]
+    before_action :ensure_variant, only: [:build]
 
     respond_to :json
 
     def build
-      @subscription_line_item.assign_attributes(params[:subscription_line_item])
+      @subscription_line_item.assign_attributes(subscription_line_item_params)
       @subscription_line_item.price_estimate = price_estimate
       render json: @subscription_line_item, serializer: Api::Admin::SubscriptionLineItemSerializer,
              shop: @shop, schedule: @schedule
@@ -24,10 +24,10 @@ module Admin
     end
 
     def load_build_context
-      @shop = Enterprise.managed_by(spree_current_user).find_by_id(params[:shop_id])
-      @schedule = permissions.editable_schedules.find_by_id(params[:schedule_id])
+      @shop = Enterprise.managed_by(spree_current_user).find_by(id: params[:shop_id])
+      @schedule = permissions.editable_schedules.find_by(id: params[:schedule_id])
       @order_cycle = @schedule.andand.current_or_next_order_cycle
-      @variant = variant_if_eligible(params[:subscription_line_item][:variant_id]) if @shop.present?
+      @variant = variant_if_eligible(subscription_line_item_params[:variant_id]) if @shop.present?
     end
 
     def new_actions
@@ -56,7 +56,11 @@ module Admin
     end
 
     def variant_if_eligible(variant_id)
-      OrderManagement::Subscriptions::VariantsList.eligible_variants(@shop).find_by_id(variant_id)
+      OrderManagement::Subscriptions::VariantsList.eligible_variants(@shop).find_by(id: variant_id)
+    end
+
+    def subscription_line_item_params
+      params.require(:subscription_line_item).permit(:quantity, :variant_id)
     end
   end
 end

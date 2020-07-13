@@ -1,7 +1,7 @@
 class UserPasswordsController < Spree::UserPasswordsController
   layout 'darkswarm'
 
-  before_filter :set_admin_redirect, only: :edit
+  before_action :set_admin_redirect, only: :edit
 
   def create
     render_unconfirmed_response && return if user_unconfirmed?
@@ -34,7 +34,7 @@ class UserPasswordsController < Spree::UserPasswordsController
   end
 
   def user_unconfirmed?
-    user = Spree::User.find_by_email(params[:spree_user][:email])
+    user = Spree::User.find_by(email: params[:spree_user][:email])
     user && !user.confirmed?
   end
 end

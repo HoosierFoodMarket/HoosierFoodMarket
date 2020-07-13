@@ -2,7 +2,7 @@
 # and begins the processing of the spreadsheet entries by the other product import classes.
 # As spreadsheets can contain any number of entries (1000+), the import is split into smaller chunks
 # of 100 items, and processed sequentially over a number of requests to avoid server timeouts.
-# The various bits of collated information such as file upload status, per-item errors or user feedback
+# The various bits of collated info such as file upload status, per-item errors or user feedback
 # on the saving process are made available to the controller through this object.
 
 require 'roo'
@@ -59,7 +59,8 @@ module ProductImport
 
     def product_field_errors?
       @entries.each do |entry|
-        return true if entry.errors.messages.value?([I18n.t('admin.product_import.model.not_updatable')])
+        return true if entry.errors.messages.
+          value?([I18n.t('admin.product_import.model.not_updatable')])
       end
       false
     end
@@ -190,7 +191,7 @@ module ProductImport
     end
 
     def staged_import?
-      @import_settings && @import_settings.key?(:start) && @import_settings.key?(:end)
+      @import_settings&.key?(:start) && @import_settings&.key?(:end)
     end
 
     def init_permissions
@@ -224,7 +225,7 @@ module ProductImport
     end
 
     def rows
-      return [] unless @sheet && @sheet.last_row
+      return [] unless @sheet&.last_row
 
       (2..@sheet.last_row).map do |i|
         @sheet.row(i)
@@ -237,6 +238,19 @@ module ProductImport
                                      error_message: e.message))
       end
       []
+    rescue CSV::MalformedCSVError => e
+      add_malformed_csv_error e.message
+      []
+    end
+
+    # This error is raised twice because init_product_importer calls both
+    # build_entries and buils_all_entries
+    def add_malformed_csv_error(error_message)
+      unless errors.added?(:importer, I18n.t('admin.product_import.model.malformed_csv',
+                                             error_message: error_message))
+        errors.add(:importer, I18n.t('admin.product_import.model.malformed_csv',
+                                     error_message: error_message))
+      end
     end
 
     def build_entries_in_range

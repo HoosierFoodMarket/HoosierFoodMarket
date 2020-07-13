@@ -2,12 +2,12 @@ module Admin
   class OrderCyclesController < ResourceController
     include OrderCyclesHelper
 
-    prepend_before_filter :set_order_cycle_id, only: [:incoming, :outgoing]
-    before_filter :load_data_for_index, only: :index
-    before_filter :require_coordinator, only: :new
-    before_filter :remove_protected_attrs, only: [:update]
-    before_filter :require_order_cycle_set_params, only: [:bulk_update]
-    around_filter :protect_invalid_destroy, only: :destroy
+    prepend_before_action :set_order_cycle_id, only: [:incoming, :outgoing]
+    before_action :load_data_for_index, only: :index
+    before_action :require_coordinator, only: :new
+    before_action :remove_protected_attrs, only: [:update]
+    before_action :require_order_cycle_set_params, only: [:bulk_update]
+    around_action :protect_invalid_destroy, only: :destroy
 
     def index
       respond_to do |format|
@@ -40,7 +40,7 @@ module Admin
     end
 
     def create
-      @order_cycle_form = OrderCycleForm.new(@order_cycle, params, spree_current_user)
+      @order_cycle_form = OrderCycleForm.new(@order_cycle, order_cycle_params, spree_current_user)
 
       if @order_cycle_form.save
         flash[:notice] = I18n.t(:order_cycles_create_notice)
@@ -56,7 +56,7 @@ module Admin
     end
 
     def update
-      @order_cycle_form = OrderCycleForm.new(@order_cycle, params, spree_current_user)
+      @order_cycle_form = OrderCycleForm.new(@order_cycle, order_cycle_params, spree_current_user)
 
       if @order_cycle_form.save
         respond_to do |format|
@@ -145,7 +145,7 @@ module Admin
         preload(:schedules).
         ransack(params[:q]).
         result.
-        accessible_by(spree_current_user)
+        visible_by(spree_current_user)
     end
 
     def load_data_for_index
@@ -164,7 +164,7 @@ module Admin
 
     def require_coordinator
       @order_cycle.coordinator =
-        permitted_coordinating_enterprises_for(@order_cycle).find_by_id(params[:coordinator_id])
+        permitted_coordinating_enterprises_for(@order_cycle).find_by(id: params[:coordinator_id])
       return if params[:coordinator_id] && @order_cycle.coordinator
 
       available_coordinators = permitted_coordinating_enterprises_for(@order_cycle)
@@ -234,6 +234,10 @@ module Admin
 
     def ams_prefix_whitelist
       [:basic, :index]
+    end
+
+    def order_cycle_params
+      PermittedAttributes::OrderCycle.new(params).call
     end
   end
 end

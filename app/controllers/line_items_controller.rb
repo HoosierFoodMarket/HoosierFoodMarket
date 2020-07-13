@@ -1,7 +1,7 @@
 class LineItemsController < BaseController
   respond_to :json
 
-  before_filter :load_line_item, only: :destroy
+  before_action :load_line_item, only: :destroy
 
   def bought
     respond_with bought_items, each_serializer: Api::LineItemSerializer
@@ -16,7 +16,7 @@ class LineItemsController < BaseController
   private
 
   def load_line_item
-    @line_item = Spree::LineItem.find_by_id(params[:id])
+    @line_item = Spree::LineItem.find_by(id: params[:id])
     not_found unless @line_item
   end
 

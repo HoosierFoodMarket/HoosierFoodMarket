@@ -5,22 +5,22 @@ require 'open_food_network/order_cycle_permissions'
 module Admin
   class EnterprisesController < ResourceController
     # These need to run before #load_resource so that @object is initialised with sanitised values
-    prepend_before_filter :override_owner, only: :create
-    prepend_before_filter :override_sells, only: :create
+    prepend_before_action :override_owner, only: :create
+    prepend_before_action :override_sells, only: :create
 
-    before_filter :load_enterprise_set, only: :index
-    before_filter :load_countries, except: [:index, :register, :check_permalink]
-    before_filter :load_methods_and_fees, only: [:edit, :update]
-    before_filter :load_groups, only: [:new, :edit, :update, :create]
-    before_filter :load_taxons, only: [:new, :edit, :update, :create]
-    before_filter :check_can_change_sells, only: :update
-    before_filter :check_can_change_bulk_sells, only: :bulk_update
-    before_filter :check_can_change_owner, only: :update
-    before_filter :check_can_change_bulk_owner, only: :bulk_update
-    before_filter :check_can_change_managers, only: :update
-    before_filter :strip_new_properties, only: [:create, :update]
-    before_filter :load_properties, only: [:edit, :update]
-    before_filter :setup_property, only: [:edit]
+    before_action :load_enterprise_set, only: :index
+    before_action :load_countries, except: [:index, :register, :check_permalink]
+    before_action :load_methods_and_fees, only: [:edit, :update]
+    before_action :load_groups, only: [:new, :edit, :update, :create]
+    before_action :load_taxons, only: [:new, :edit, :update, :create]
+    before_action :check_can_change_sells, only: :update
+    before_action :check_can_change_bulk_sells, only: :bulk_update
+    before_action :check_can_change_owner, only: :update
+    before_action :check_can_change_bulk_owner, only: :bulk_update
+    before_action :check_can_change_managers, only: :update
+    before_action :strip_new_properties, only: [:create, :update]
+    before_action :load_properties, only: [:edit, :update]
+    before_action :setup_property, only: [:edit]
 
     helper 'spree/products'
     include OrderCyclesHelper
@@ -47,7 +47,7 @@ module Admin
       tag_rules_attributes = params[object_name].delete :tag_rules_attributes
       update_tag_rules(tag_rules_attributes) if tag_rules_attributes.present?
       update_enterprise_notifications
-      if @object.update_attributes(params[object_name])
+      if @object.update(enterprise_params)
         invoke_callbacks(:update, :after)
         flash[:success] = flash_message_for(@object, :successfully_updated)
         respond_with(@object) do |format|
@@ -71,7 +71,7 @@ module Admin
 
       attributes = { sells: params[:sells], visible: true }
 
-      if @enterprise.update_attributes(attributes)
+      if @enterprise.update(attributes)
         flash[:success] = I18n.t(:enterprise_register_success_notice, enterprise: @enterprise.name)
         redirect_to admin_dashboard_path
       else
@@ -115,7 +115,7 @@ module Admin
     def build_resource_with_address
       enterprise = build_resource_without_address
       enterprise.address ||= Spree::Address.new
-      enterprise.address.country ||= Spree::Country.find_by_id(Spree::Config[:default_country_id])
+      enterprise.address.country ||= Spree::Country.find_by(id: Spree::Config[:default_country_id])
       enterprise
     end
     alias_method_chain :build_resource, :address
@@ -123,7 +123,7 @@ module Admin
     # Overriding method on Spree's resource controller,
     # so that resources are found using permalink
     def find_resource
-      Enterprise.find_by_permalink(params[:id])
+      Enterprise.find_by(permalink: params[:id])
     end
 
     private
@@ -139,14 +139,14 @@ module Admin
     def collection
       case action
       when :for_order_cycle
-        @order_cycle = OrderCycle.find_by_id(params[:order_cycle_id]) if params[:order_cycle_id]
-        coordinator = Enterprise.find_by_id(params[:coordinator_id]) if params[:coordinator_id]
+        @order_cycle = OrderCycle.find_by(id: params[:order_cycle_id]) if params[:order_cycle_id]
+        coordinator = Enterprise.find_by(id: params[:coordinator_id]) if params[:coordinator_id]
         @order_cycle = OrderCycle.new(coordinator: coordinator) if @order_cycle.nil? && coordinator.present?
 
         enterprises = OpenFoodNetwork::OrderCyclePermissions.new(spree_current_user, @order_cycle)
           .visible_enterprises
 
-        unless enterprises.empty?
+        if enterprises.present?
           enterprises.includes(
             supplied_products:
               [:supplier, master: [:images], variants: { option_values: :option_type }]
@@ -211,9 +211,10 @@ module Admin
       # record is persisted. This problem is compounded by the use of calculators.
       @object.transaction do
         tag_rules_attributes.select{ |_i, attrs| attrs[:type].present? }.each do |_i, attrs|
-          rule = @object.tag_rules.find_by_id(attrs.delete(:id)) || attrs[:type].constantize.new(enterprise: @object)
+          rule = @object.tag_rules.find_by(id: attrs.delete(:id)) ||
+                 attrs[:type].constantize.new(enterprise: @object)
           create_calculator_for(rule, attrs) if rule.type == "TagRule::DiscountOrder" && rule.calculator.nil?
-          rule.update_attributes(attrs)
+          rule.update(attrs)
         end
       end
     end
@@ -226,7 +227,7 @@ module Admin
 
     def create_calculator_for(rule, attrs)
       if attrs[:calculator_type].present? && attrs[:calculator_attributes].present?
-        rule.update_attributes(calculator_type: attrs[:calculator_type])
+        rule.update(calculator_type: attrs[:calculator_type])
         attrs[:calculator_attributes].merge!( id: rule.calculator.id )
       end
     end
@@ -234,7 +235,9 @@ module Admin
     def check_can_change_bulk_sells
       unless spree_current_user.admin?
         params[:enterprise_set][:collection_attributes].each do |_i, enterprise_params|
-          enterprise_params.delete :sells unless spree_current_user == Enterprise.find_by_id(enterprise_params[:id]).owner
+          unless spree_current_user == Enterprise.find_by(id: enterprise_params[:id]).owner
+            enterprise_params.delete :sells
+          end
         end
       end
     end
@@ -252,7 +255,7 @@ module Admin
     def override_sells
       unless spree_current_user.admin?
         has_hub = spree_current_user.owned_enterprises.is_hub.any?
-        new_enterprise_is_producer = Enterprise.new(params[:enterprise]).is_primary_producer
+        new_enterprise_is_producer = Enterprise.new(enterprise_params).is_primary_producer
         params[:enterprise][:sells] = has_hub && !new_enterprise_is_producer ? 'any' : 'none'
       end
     end
@@ -310,6 +313,15 @@ module Admin
 
     def ams_prefix_whitelist
       [:index, :basic]
+    end
+
+    def enterprise_params
+      PermittedAttributes::Enterprise.new(params).call
+    end
+
+    # Used in ResourceController#create
+    def permitted_resource_params
+      enterprise_params
     end
   end
 end

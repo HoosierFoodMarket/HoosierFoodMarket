@@ -158,6 +158,9 @@ feature '
 
     expect(page).to have_selector 'h1.page-title', text: "Customer Details"
 
+    # The customer selection partial should be visible
+    expect(page).to have_selector '#select-customer'
+
     # And I select that customer's email address and save the order
     targetted_select2_search customer.email, from: '#customer_search_override',
                                              dropdown_css: '.select2-drop'
@@ -249,7 +252,7 @@ feature '
                                     href: spree.resend_admin_order_path(order)
           expect(page).to have_link "Send Invoice", href: spree.invoice_admin_order_path(order)
           expect(page).to have_link "Print Invoice", href: spree.print_admin_order_path(order)
-          expect(page).to have_link "Cancel Order", href: spree.fire_admin_order_path(order,                                                                                      e: 'cancel')
+          expect(page).to have_link "Cancel Order", href: spree.fire_admin_order_path(order, e: 'cancel')
         end
       end
 
@@ -282,7 +285,7 @@ feature '
                          from: 'selected_shipping_rate_id'
           find('.save-method').click
 
-          expect(page).to have_content different_shipping_method_for_distributor1.name
+          expect(page).to have_content "Shipping: #{different_shipping_method_for_distributor1.name}"
         end
       end
 

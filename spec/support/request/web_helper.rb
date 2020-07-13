@@ -38,7 +38,7 @@ module WebHelper
 
   def select_by_value(value, options = {})
     from = options.delete :from
-    page.find_by_id(from).find("option[value='#{value}']").select_option
+    page.find_by(id: from).find("option[value='#{value}']").select_option
   end
 
   def flash_message
@@ -93,10 +93,6 @@ module WebHelper
       sleep(0.1) until value = yield
       value
     end
-  end
-
-  def wait_until_enabled(selector)
-    wait_until(10) { first("#{selector}:not([disabled='disabled'])") }
   end
 
   def select2_select(value, options)

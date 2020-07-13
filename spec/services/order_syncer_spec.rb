@@ -175,7 +175,7 @@ describe OrderSyncer do
 
       context "when the bill_address on the order doesn't match that on the subscription" do
         before do
-          order.bill_address.update_attributes!(firstname: "Jane")
+          order.bill_address.update!(firstname: "Jane")
           order.update!
         end
 
@@ -220,7 +220,7 @@ describe OrderSyncer do
 
       context "when the bill_address on the order doesn't match that on the subscription" do
         before do
-          order.bill_address.update_attributes!(firstname: "Jane")
+          order.bill_address.update!(firstname: "Jane")
           order.update!
         end
 
@@ -348,7 +348,7 @@ describe OrderSyncer do
 
       context "when the ship address on the order doesn't match that on the subscription" do
         before do
-          order.ship_address.update_attributes(firstname: "Jane")
+          order.ship_address.update(firstname: "Jane")
           order.update!
         end
 
@@ -416,7 +416,7 @@ describe OrderSyncer do
           line_items = Spree::LineItem.where(order_id: subscription.orders, variant_id: sli.variant_id)
           expect(line_items.map(&:quantity)).to eq [1]
           expect(order.reload.total.to_f).to eq 59.97
-          line_item = order.line_items.find_by_variant_id(sli.variant_id)
+          line_item = order.line_items.find_by(variant_id: sli.variant_id)
           expect(syncer.order_update_issues[order.id]).to include "#{line_item.product.name} - #{line_item.variant.full_name} - Insufficient stock available"
         end
 
@@ -427,7 +427,7 @@ describe OrderSyncer do
 
           expect(syncer.sync!).to be true
 
-          line_item = order.line_items.find_by_variant_id(sli.variant_id)
+          line_item = order.line_items.find_by(variant_id: sli.variant_id)
           expect(syncer.order_update_issues[order.id]).to include "#{line_item.product.name} - #{line_item.variant.full_name} - Out of Stock"
         end
       end
@@ -436,12 +436,12 @@ describe OrderSyncer do
     context "where the quantity of the item on an initialised order has already been changed" do
       let(:params) { { subscription_line_items_attributes: [{ id: sli.id, quantity: 3 }] } }
       let(:syncer) { OrderSyncer.new(subscription) }
-      let(:changed_line_item) { order.line_items.find_by_variant_id(sli.variant_id) }
+      let(:changed_line_item) { order.line_items.find_by(variant_id: sli.variant_id) }
 
       before { variant.update_attribute(:on_hand, 3) }
 
       context "when the changed line_item quantity matches the new quantity on the subscription line item" do
-        before { changed_line_item.update_attributes(quantity: 3) }
+        before { changed_line_item.update(quantity: 3) }
 
         it "does not change the quantity, and doesn't add the order to order_update_issues" do
           expect(order.reload.total.to_f).to eq 99.95
@@ -454,7 +454,7 @@ describe OrderSyncer do
       end
 
       context "when the changed line_item quantity doesn't match the new quantity on the subscription line item" do
-        before { changed_line_item.update_attributes(quantity: 2) }
+        before { changed_line_item.update(quantity: 2) }
 
         it "does not change the quantity, and adds the order to order_update_issues" do
           expect(order.reload.total.to_f).to eq 79.96

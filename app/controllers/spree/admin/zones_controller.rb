@@ -1,7 +1,7 @@
 module Spree
   module Admin
     class ZonesController < ResourceController
-      before_filter :load_data, except: [:index]
+      before_action :load_data, except: [:index]
 
       def new
         @zone.zone_members.build
@@ -20,6 +20,17 @@ module Spree
         @countries = Country.order(:name)
         @states = State.order(:name)
         @zones = Zone.order(:name)
+      end
+
+      def permitted_resource_params
+        params.require(:zone).permit(
+          :name, :description, :default_tax, :kind,
+          zone_members_attributes: [:id, :zoneable_id, :zoneable_type, :_destroy]
+        )
+      end
+
+      def location_after_save
+        edit_object_url(@zone)
       end
     end
   end

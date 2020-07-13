@@ -5,12 +5,12 @@ class ProducerProperty < ActiveRecord::Base
   default_scope { order("#{table_name}.position") }
 
   def property_name
-    property.name if property
+    property&.name
   end
 
   def property_name=(name)
     if name.present?
-      self.property = Spree::Property.find_by_name(name) ||
+      self.property = Spree::Property.find_by(name: name) ||
                       Spree::Property.create(name: name, presentation: name)
     end
   end

@@ -1,7 +1,7 @@
 class ShopController < BaseController
   layout "darkswarm"
-  before_filter :require_distributor_chosen, :set_order_cycles, except: :changeable_orders_alert
-  before_filter :enable_embedded_shopfront
+  before_action :require_distributor_chosen, :set_order_cycles, except: :changeable_orders_alert
+  before_action :enable_embedded_shopfront
 
   def show
     redirect_to main_app.enterprise_shop_path(current_distributor)
@@ -9,7 +9,7 @@ class ShopController < BaseController
 
   def order_cycle
     if request.post?
-      if oc = OrderCycle.with_distributor(@distributor).active.find_by_id(params[:order_cycle_id])
+      if oc = OrderCycle.with_distributor(@distributor).active.find_by(id: params[:order_cycle_id])
         current_order(true).set_order_cycle! oc
         @current_order_cycle = oc
         render json: @current_order_cycle, serializer: Api::OrderCycleSerializer

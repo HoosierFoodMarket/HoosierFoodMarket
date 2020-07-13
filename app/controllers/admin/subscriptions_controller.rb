@@ -2,12 +2,12 @@ require 'open_food_network/permissions'
 
 module Admin
   class SubscriptionsController < ResourceController
-    before_filter :load_shops, only: [:index]
-    before_filter :load_form_data, only: [:new, :edit]
-    before_filter :strip_banned_attrs, only: [:update]
-    before_filter :wrap_nested_attrs, only: [:create, :update]
-    before_filter :check_for_open_orders, only: [:cancel, :pause]
-    before_filter :check_for_canceled_orders, only: [:unpause]
+    before_action :load_shops, only: [:index]
+    before_action :load_form_data, only: [:new, :edit]
+    before_action :strip_banned_attrs, only: [:update]
+    before_action :wrap_nested_attrs, only: [:create, :update]
+    before_action :check_for_open_orders, only: [:cancel, :pause]
+    before_action :check_for_canceled_orders, only: [:unpause]
     respond_to :json
 
     def index
@@ -52,7 +52,7 @@ module Admin
         @subscription.proxy_orders.placed_and_open.each(&:cancel)
       end
 
-      @subscription.update_attributes(paused_at: Time.zone.now)
+      @subscription.update(paused_at: Time.zone.now)
       render_as_json @subscription
     end
 
@@ -64,7 +64,7 @@ module Admin
     private
 
     def save_form_and_render(render_issues = true)
-      form = OrderManagement::Subscriptions::Form.new(@subscription, params[:subscription])
+      form = OrderManagement::Subscriptions::Form.new(@subscription, subscription_params)
       unless form.save
         render json: { errors: form.json_errors }, status: :unprocessable_entity
         return
@@ -148,11 +148,15 @@ module Admin
     # Overriding Spree method to load data from params here so that
     # we can authorise #create using an object with required attributes
     def build_resource
-      Subscription.new(params[:subscription])
+      Subscription.new(subscription_params)
     end
 
     def ams_prefix_whitelist
       [:index]
+    end
+
+    def subscription_params
+      PermittedAttributes::Subscription.new(params).call
     end
   end
 end

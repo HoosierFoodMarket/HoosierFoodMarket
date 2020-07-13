@@ -1,10 +1,10 @@
 module Spree
   module Admin
     class ShippingMethodsController < ResourceController
-      before_filter :load_data, except: [:index]
-      before_filter :set_shipping_category, only: [:create, :update]
-      before_filter :set_zones, only: [:create, :update]
-      before_filter :load_hubs, only: [:new, :edit, :create, :update]
+      before_action :load_data, except: [:index]
+      before_action :set_shipping_category, only: [:create, :update]
+      before_action :set_zones, only: [:create, :update]
+      before_action :load_hubs, only: [:new, :edit, :create, :update]
 
       # Sort shipping methods by distributor name
       def collection
@@ -80,6 +80,19 @@ module Spree
       def load_data
         @available_zones = Zone.order(:name)
         @calculators = ShippingMethod.calculators.sort_by(&:name)
+      end
+
+      def permitted_resource_params
+        params.require(:shipping_method).permit(
+          :name, :description, :display_on,
+          :require_ship_address, :tag_list, :calculator_type,
+          distributor_ids: [],
+          calculator_attributes: [
+            :id, :preferred_currency, :preferred_amount, :preferred_per_kg, :preferred_flat_percent,
+            :preferred_first_item, :preferred_additional_item, :preferred_max_items,
+            :preferred_minimal_amount, :preferred_normal_amount, :preferred_discount_amount
+          ]
+        )
       end
     end
   end

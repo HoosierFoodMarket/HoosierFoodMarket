@@ -14,8 +14,6 @@ module Spree
 
       validate :ensure_enterprise_selected
 
-      attr_accessible :preferred_enterprise_id
-
       def method_type
         'stripe_sca'
       end
@@ -29,7 +27,7 @@ module Spree
       end
 
       def stripe_account_id
-        StripeAccount.find_by_enterprise_id(preferred_enterprise_id).andand.stripe_user_id
+        StripeAccount.find_by(enterprise_id: preferred_enterprise_id).andand.stripe_user_id
       end
 
       # NOTE: the name of this method is determined by Spree::Payment::Processing
@@ -59,8 +57,11 @@ module Spree
 
       # NOTE: the name of this method is determined by Spree::Payment::Processing
       def void(response_code, _creditcard, gateway_options)
+        payment_intent_id = response_code
+        payment_intent_response = Stripe::PaymentIntent.retrieve(payment_intent_id,
+                                                                 stripe_account: stripe_account_id)
         gateway_options[:stripe_account] = stripe_account_id
-        provider.void(response_code, gateway_options)
+        provider.refund(payment_intent_response.amount_received, response_code, gateway_options)
       end
 
       # NOTE: the name of this method is determined by Spree::Payment::Processing
@@ -112,7 +113,7 @@ module Spree
       def fetch_payment(creditcard, gateway_options)
         order_number = gateway_options[:order_id].split('-').first
 
-        Spree::Order.find_by_number(order_number).payments.merge(creditcard.payments).last
+        Spree::Order.find_by(number: order_number).payments.merge(creditcard.payments).last
       end
 
       def failed_activemerchant_billing_response(error_message)

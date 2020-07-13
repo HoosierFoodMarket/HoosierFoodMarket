@@ -13,10 +13,10 @@ module Spree
       create.before :create_before
       update.before :update_before
 
-      before_filter :load_data
-      before_filter :load_form_data, only: [:index, :new, :create, :edit, :update]
-      before_filter :load_spree_api_key, only: [:index, :variant_overrides]
-      before_filter :strip_new_properties, only: [:create, :update]
+      before_action :load_data
+      before_action :load_form_data, only: [:index, :new, :create, :edit, :update]
+      before_action :load_spree_api_key, only: [:index, :variant_overrides]
+      before_action :strip_new_properties, only: [:create, :update]
 
       respond_override create: { html: {
         success: lambda {
@@ -96,7 +96,7 @@ module Spree
       protected
 
       def find_resource
-        Product.find_by_permalink!(params[:id])
+        Product.find_by!(permalink: params[:id])
       end
 
       def location_after_save
@@ -159,9 +159,21 @@ module Spree
 
       private
 
-      def product_set_from_params(params)
-        collection_hash = Hash[params[:products].each_with_index.map { |p, i| [i, p] }]
+      def product_set_from_params(_params)
+        collection_hash = Hash[products_params.each_with_index.map { |p, i| [i, p] }]
         Spree::ProductSet.new(collection_attributes: collection_hash)
+      end
+
+      def products_params
+        params.require(:products).map do |product|
+          product.permit(::PermittedAttributes::Product.attributes)
+        end
+      end
+
+      def permitted_resource_params
+        return params[:product] if params[:product].blank?
+
+        params.require(:product).permit(::PermittedAttributes::Product.attributes)
       end
 
       def bulk_index_query(params)

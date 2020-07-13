@@ -34,7 +34,9 @@ module OpenFoodNetwork
     end
 
     def search
-      @permissions.visible_orders.complete.not_state(:canceled).search(@params[:q])
+      @permissions.visible_orders.select("DISTINCT spree_orders.*").
+        complete.not_state(:canceled).
+        search(@params[:q])
     end
 
     def table
@@ -92,7 +94,7 @@ module OpenFoodNetwork
     # @return [Array]
     def row_for(line_item, order)
       [
-        order.created_at,
+        order.completed_at.strftime("%F %T"),
         order.id,
         order.bill_address.full_name,
         order.email,

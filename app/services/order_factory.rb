@@ -46,7 +46,7 @@ class OrderFactory
 
   def build_line_items
     attrs[:line_items].each do |li|
-      next unless variant = Spree::Variant.find_by_id(li[:variant_id])
+      next unless variant = Spree::Variant.find_by(id: li[:variant_id])
 
       scoper.scope(variant)
       li[:quantity] = stock_limited_quantity(variant.on_demand, variant.on_hand, li[:quantity])
@@ -66,7 +66,7 @@ class OrderFactory
   end
 
   def set_addresses
-    @order.update_attributes(attrs.slice(:bill_address_attributes, :ship_address_attributes))
+    @order.update(attrs.slice(:bill_address_attributes, :ship_address_attributes))
   end
 
   def create_shipment

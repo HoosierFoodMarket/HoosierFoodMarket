@@ -3,7 +3,7 @@ module Api
     respond_to :json
 
     skip_authorization_check only: [:index, :show]
-    before_filter :product
+    before_action :product
 
     def index
       @variants = scope.includes(option_values: :option_type).ransack(params[:q]).result
@@ -28,7 +28,7 @@ module Api
     def update
       authorize! :update, Spree::Variant
       @variant = scope.find(params[:id])
-      if @variant.update_attributes(params[:variant])
+      if @variant.update(params[:variant])
         render json: @variant, serializer: Api::VariantSerializer, status: :ok
       else
         invalid_resource!(@product)
@@ -47,7 +47,7 @@ module Api
     private
 
     def product
-      @product ||= Spree::Product.find_by_permalink(params[:product_id]) if params[:product_id]
+      @product ||= Spree::Product.find_by(permalink: params[:product_id]) if params[:product_id]
     end
 
     def scope
@@ -58,7 +58,7 @@ module Api
                      @product.variants_including_master
                    end
       else
-        variants = Spree::Variant.scoped
+        variants = Spree::Variant.where(nil)
         if current_api_user.has_spree_role?("admin")
           unless params[:show_deleted]
             variants = Spree::Variant.active

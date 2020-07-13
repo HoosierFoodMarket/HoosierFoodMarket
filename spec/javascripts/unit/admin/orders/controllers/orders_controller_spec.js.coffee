@@ -5,6 +5,7 @@ describe "ordersCtrl", ->
   orders = [
     { id: 8, order_cycle: { id: 4 }, distributor: { id: 5 }, number: "R123456" }
     { id: 9, order_cycle: { id: 5 }, distributor: { id: 7 }, number: "R213776" }
+    { id: 10, order_cycle: { id: 6 }, distributor: { id: 8 }, number: "R213777" }
   ]
   form = {
     q: {
@@ -42,7 +43,7 @@ describe "ordersCtrl", ->
       expect($scope.page).toEqual 2
       expect(Orders.index).toHaveBeenCalled()
 
-  describe "sorting products", ->
+  describe "sorting orders", ->
     it "sorts orders", ->
       spyOn $scope, "fetchResults"
 
@@ -51,3 +52,25 @@ describe "ordersCtrl", ->
 
       expect($scope.sorting).toEqual 'number asc'
       expect($scope.fetchResults).toHaveBeenCalled()
+
+  describe "filtering orders", ->
+    it "filters orders by all selected order cycles", ->
+      $scope['q']['order_cycle_id_in'] = ['4', '5']
+
+      $scope.fetchResults()
+
+      # Fetched with correct square brackets in field name for array value
+      expect(Orders.index).toHaveBeenCalledWith(jasmine.objectContaining({
+        'q[order_cycle_id_in][]': ['4', '5']
+      }))
+
+    it "filters orders on inclusive dates", ->
+      $scope['q']['completed_at_gteq'] = '2020-06-08'
+      $scope['q']['completed_at_lteq'] = '2020-06-09'
+
+      $scope.fetchResults()
+
+      expect(Orders.index).toHaveBeenCalledWith(jasmine.objectContaining({
+        'q[completed_at_gteq]': '2020-06-08 00:00:00'
+        'q[completed_at_lteq]': '2020-06-09 23:59:59'
+      }))

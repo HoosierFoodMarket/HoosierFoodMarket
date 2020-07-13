@@ -27,6 +27,7 @@ module OpenFoodNetwork
 
     def table_items
       return [] unless @render_table
+
       report_line_items.list(report.line_item_includes)
     end
 
@@ -44,6 +45,17 @@ module OpenFoodNetwork
 
     def product_name
       proc { |line_items| line_items.first.variant.product.name }
+    end
+
+    def total_units(line_items)
+      return " " if not_all_have_unit?(line_items)
+
+      total_units = line_items.sum do |li|
+        product = li.variant.product
+        li.quantity * li.unit_value / scale_factor(product)
+      end
+
+      total_units.round(3)
     end
 
     def variant_scoper_for(distributor_id)
@@ -71,17 +83,6 @@ module OpenFoodNetwork
       end
     end
 
-    def total_units(line_items)
-      return " " if not_all_have_unit?(line_items)
-
-      total_units = line_items.sum do |li|
-        product = li.variant.product
-        li.quantity * li.unit_value / scale_factor(product)
-      end
-
-      total_units.round(3)
-    end
-
     def not_all_have_unit?(line_items)
       line_items.map { |li| li.unit_value.nil? }.any?
     end
@@ -92,6 +93,7 @@ module OpenFoodNetwork
 
     def order_permissions
       return @order_permissions unless @order_permissions.nil?
+
       @order_permissions = ::Permissions::Order.new(@user, options[:q])
     end
 

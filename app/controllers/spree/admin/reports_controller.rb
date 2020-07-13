@@ -12,7 +12,6 @@ require 'open_food_network/order_cycle_management_report'
 require 'open_food_network/packing_report'
 require 'open_food_network/sales_tax_report'
 require 'open_food_network/xero_invoices_report'
-require 'open_food_network/bulk_coop_report'
 require 'open_food_network/payments_report'
 require 'open_food_network/orders_and_fulfillments_report'
 
@@ -21,11 +20,16 @@ module Spree
     class ReportsController < Spree::Admin::BaseController
       include Spree::ReportsHelper
 
+      ORDER_MANAGEMENT_ENGINE_REPORTS = [
+        :bulk_coop,
+        :enterprise_fee_summary
+      ].freeze
+
       helper_method :render_content?
 
-      before_filter :cache_search_state
+      before_action :cache_search_state
       # Fetches user's distributors, suppliers and order_cycles
-      before_filter :load_data,
+      before_action :load_data,
                     only: [:customers, :products_and_inventory, :order_cycle_management, :packing]
 
       respond_to :html
@@ -89,19 +93,6 @@ module Spree
         @report_type = params[:report_type]
         @report = OpenFoodNetwork::SalesTaxReport.new spree_current_user, params, render_content?
         render_report(@report.header, @report.table, params[:csv], "sales_tax.csv")
-      end
-
-      def bulk_coop
-        # -- Prepare form options
-        @distributors = my_distributors
-        @report_type = params[:report_type]
-
-        # -- Build Report with Order Grouper
-        @report = OpenFoodNetwork::BulkCoopReport.new spree_current_user, params, render_content?
-        @table = order_grouper_table
-        csv_file_name = "bulk_coop_#{params[:report_type]}_#{timestamp}.csv"
-
-        render_report(@report.header, @table, params[:csv], csv_file_name)
       end
 
       def payments
@@ -247,20 +238,22 @@ module Spree
       end
 
       def suppliers_of_products_distributed_by(distributors)
-        distributors.map { |d| Spree::Product.in_distributor(d).includes(:supplier).all }.
-          flatten.map(&:supplier).uniq
+        supplier_ids = Spree::Product.in_distributors(distributors.select('enterprises.id')).
+          select('spree_products.supplier_id')
+
+        Enterprise.where(id: supplier_ids)
       end
 
       # Load order cycles the current user has access to
       def my_order_cycles
         OrderCycle.
           active_or_complete.
-          accessible_by(spree_current_user).
+          visible_by(spree_current_user).
           order('orders_close_at DESC')
       end
 
       def order_grouper_table
-        order_grouper = OpenFoodNetwork::OrderGrouper.new @report.rules, @report.columns
+        order_grouper = OpenFoodNetwork::OrderGrouper.new @report.rules, @report.columns, @report
         order_grouper.table(@report.table_items)
       end
 
@@ -309,7 +302,7 @@ module Spree
 
       # List of reports that have been moved to the Order Management engine
       def report_in_order_management_engine?(report)
-        report == :enterprise_fee_summary
+        ORDER_MANAGEMENT_ENGINE_REPORTS.include?(report)
       end
 
       def timestamp

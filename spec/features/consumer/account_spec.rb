@@ -56,7 +56,11 @@ feature '
 
         # It shows all hubs that have been ordered from with balance or credit
         expect(page).to have_content distributor1.name
+        expect(page).to have_link(distributor1.name,
+                                  href: "#{distributor1.permalink}/shop", count: 1)
         expect(page).to have_content distributor2.name
+        expect(page).to have_link(distributor2.name,
+                                  href: "#{distributor2.permalink}/shop", count: 1)
         expect(page).not_to have_content distributor_without_orders.name
 
         expect(page).to have_content distributor1.name + " " + "Balance due"
@@ -72,7 +76,7 @@ feature '
 
       context "when there is at least one changeable order" do
         before do
-          distributor1.update_attributes(allow_order_changes: true)
+          distributor1.update(allow_order_changes: true)
         end
 
         it "shows such orders in a section labelled 'Open Orders'" do
@@ -82,7 +86,7 @@ feature '
           expect(page).to have_link d1o1.number, href: spree.order_path(d1o1)
           expect(page).to have_link d1o2.number, href: spree.order_path(d1o2)
           expect(page).to have_link(distributor1.name,
-                                  href: "#{distributor1.permalink}/shop", count: 2)
+                                    href: "#{distributor1.permalink}/shop", count: 2)
           expect(page).to have_link I18n.t('spree.users.open_orders.cancel'), href: spree.cancel_order_path(d1o1)
           expect(page).to have_link I18n.t('spree.users.open_orders.cancel'), href: spree.cancel_order_path(d1o2)
         end

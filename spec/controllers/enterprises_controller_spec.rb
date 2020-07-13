@@ -2,22 +2,37 @@ require 'spec_helper'
 
 describe EnterprisesController, type: :controller do
   describe "shopping for a distributor" do
+    let(:user) { create(:user) }
     let(:order) { controller.current_order(true) }
-
+    let(:line_item) { create(:line_item) }
     let!(:current_distributor) { create(:distributor_enterprise, with_payment_and_shipping: true) }
     let!(:distributor) { create(:distributor_enterprise, with_payment_and_shipping: true) }
-    let!(:order_cycle1) { create(:simple_order_cycle, distributors: [distributor], orders_open_at: 2.days.ago, orders_close_at: 3.days.from_now ) }
+    let!(:order_cycle1) { create(:simple_order_cycle, distributors: [distributor], orders_open_at: 2.days.ago, orders_close_at: 3.days.from_now, variants: [line_item.variant] ) }
     let!(:order_cycle2) { create(:simple_order_cycle, distributors: [distributor], orders_open_at: 3.days.ago, orders_close_at: 4.days.from_now ) }
 
     before do
       order.set_distributor! current_distributor
+      order.line_items << line_item
     end
 
     it "sets the shop as the distributor on the order when shopping for the distributor" do
       spree_get :shop, id: distributor
 
+      expect(controller.current_distributor).to eq(distributor)
       expect(controller.current_order.distributor).to eq(distributor)
       expect(controller.current_order.order_cycle).to be_nil
+    end
+
+    context "when user is logged in" do
+      before { allow(controller).to receive(:spree_current_user) { user } }
+
+      it "sets the shop as the distributor on the order when shopping for the distributor" do
+        spree_get :shop, id: distributor
+
+        expect(controller.current_distributor).to eq(distributor)
+        expect(controller.current_order.distributor).to eq(distributor)
+        expect(controller.current_order.order_cycle).to be_nil
+      end
     end
 
     it "sorts order cycles by the distributor's preferred ordering attr" do
@@ -31,7 +46,6 @@ describe EnterprisesController, type: :controller do
     end
 
     context "using FilterOrderCycles tag rules" do
-      let(:user) { create(:user) }
       let!(:order_cycle3) { create(:simple_order_cycle, distributors: [distributor], orders_open_at: 3.days.ago, orders_close_at: 4.days.from_now) }
       let!(:oc3_exchange) { order_cycle3.exchanges.outgoing.to_enterprise(distributor).first }
       let(:customer) { create(:customer, user: user, enterprise: distributor) }
@@ -81,21 +95,16 @@ describe EnterprisesController, type: :controller do
     end
 
     it "should not empty an order if returning to the same distributor" do
-      product = create(:product)
-      create(:simple_order_cycle, distributors: [current_distributor], variants: [product.variants.first])
-      line_item = create(:line_item, variant: product.variants.first)
-      controller.current_order.line_items << line_item
-
       spree_get :shop, id: current_distributor
 
       expect(controller.current_order.distributor).to eq current_distributor
-      expect(controller.current_order.line_items.first.variant).to eq product.variants.first
+      expect(controller.current_order.line_items.first.variant).to eq line_item.variant
     end
 
     describe "when an out of stock item is in the cart" do
       let(:variant) { create(:variant, on_demand: false, on_hand: 10) }
       let(:line_item) { create(:line_item, variant: variant) }
-      let(:order_cycle) { create(:simple_order_cycle, distributors: [distributor], variants: [variant]) }
+      let(:order_cycle) { create(:simple_order_cycle, distributors: [current_distributor], variants: [variant]) }
 
       before do
         order.set_distribution! current_distributor, order_cycle
@@ -112,6 +121,19 @@ describe EnterprisesController, type: :controller do
       end
     end
 
+    it "resets order if the order cycle of the current order is no longer open or visible" do
+      order.distributor = distributor
+      order.order_cycle = order_cycle1
+      order.save
+      order_cycle1.update_attribute :orders_close_at, Time.zone.now
+
+      spree_get :shop, id: distributor
+
+      expect(controller.current_order.distributor).to eq(distributor)
+      expect(controller.current_order.order_cycle).to eq(order_cycle2)
+      expect(controller.current_order.line_items).to be_empty
+    end
+
     it "sets order cycle if only one is available at the chosen distributor" do
       order_cycle2.destroy
 
@@ -126,16 +148,16 @@ describe EnterprisesController, type: :controller do
     # let(:enterprise) { create(:enterprise, permalink: 'enterprise_permalink') }
 
     it "responds with status of 200 when the route does not exist" do
-      spree_get :check_permalink, permalink: 'some_nonexistent_route', format: :js
+      xhr :get, :check_permalink, permalink: 'some_nonexistent_route', format: :js
       expect(response.status).to be 200
     end
 
     it "responds with status of 409 when the permalink matches an existing route" do
       # spree_get :check_permalink, { permalink: 'enterprise_permalink', format: :js }
       # expect(response.status).to be 409
-      spree_get :check_permalink, permalink: 'map', format: :js
+      xhr :get, :check_permalink, permalink: 'map', format: :js
       expect(response.status).to be 409
-      spree_get :check_permalink, permalink: '', format: :js
+      xhr :get, :check_permalink, permalink: '', format: :js
       expect(response.status).to be 409
     end
   end

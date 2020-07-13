@@ -23,6 +23,8 @@ es_CR:
         base: "Tarjeta de crédito"
       order_cycle:
         orders_close_at: Fecha de cierre
+      variant_override:
+        count_on_hand: "Disponibles"
     errors:
       models:
         spree/user:
@@ -179,8 +181,7 @@ es_CR:
         title: Otros fallos (%{count} pedidos)
         explainer: El procesamiento automático de estas órdenes falló por un motivo desconocido. Esto no debería ocurrir, contáctanos si estás viendo esto.
   home: "OFN"
-  title: Open Food Network
-  welcome_to: 'Bienvenido a '
+  title: "Open Food Network"
   site_meta_description: "Nosotros empezamos desde abajo. Con granjeros y productores listos para contar sus historias con orgullo y autenticidad. Con distribuidores listos para conectar gente con productos de forma justa y honesta. Con compradores que creen que mejores decisiones de compras semanales pueden..."
   search_by_name: Buscar por nombre o cantón...
   producers_join: Los productores costarricenses son bienvenidos a unirse ahora a Open Food Network (LaFeriaCR).
@@ -268,6 +269,7 @@ es_CR:
   backordered: "Pedido pendiente"
   on hand: "Disponibles"
   ship: "Envío"
+  shipping_category: "Categoría de envío"
   actions:
     create_and_add_another: "Crear y agregar otro"
     create: "Crear"
@@ -368,7 +370,6 @@ es_CR:
         title: "Configuración de Matomo"
         matomo_url: "URL de Matomo"
         matomo_site_id: "ID de sitio de Matomo"
-        info_html: "Matomo es un analizador web y móvil. Puede alojar Matomo en sus servidores o utilizar un servicio alojado en la nube. Consulte <a href='http://matomo.org' target='_blank'> matomo.org </a> para obtener más información."
         config_instructions_html: "Aquí puede configurar la integración de OFN Matomo. La siguiente URL de Matomo debe apuntar a la instancia de Matomo a la que se enviará la información de seguimiento del usuario; si se deja vacío, el seguimiento del usuario Matomo se desactivará. El campo ID del sitio no es obligatorio, pero es útil si está rastreando más de un sitio web en una sola instancia de Matomo; se puede encontrar en la consola de la instancia de Matomo."
     customers:
       index:
@@ -403,6 +404,7 @@ es_CR:
         footer_and_external_links: Pie de página y enlaces externos
         your_content: Tu contenido
         user_guide: Manual de usuario
+        map: Mapa
     enterprise_fees:
       index:
         title: "Comisiones de la organización"
@@ -686,12 +688,11 @@ es_CR:
           ofn_uid: UID de OFN
           ofn_uid_tip: La identificación única utilizada para identificar la organización en Open Food Network.
         shipping_methods:
-          name: Nombre
-          applies: ¿Aplicar?
-          manage: Gestionar métodos de envío
-          create_button: Crear nuevo método de envío
-          create_one_button: Crear una ahora
-          no_method_yet: Todavía no tienes ningún método de envío.
+          name: "Nombre"
+          manage: "Gestionar métodos de envío"
+          create_button: "Crear nuevo método de envío"
+          create_one_button: "Crear una ahora"
+          no_method_yet: "Todavía no tienes ningún método de envío."
         shop_preferences:
           shopfront_requires_login: "¿Quieres que la tienda sea visible y pública?"
           shopfront_requires_login_tip: "Elije si los clientes deben iniciar sesión para ver la tienda o si es visible para todos."
@@ -1142,15 +1143,15 @@ es_CR:
     menu:
       cart:
         cart: "Carrito"
+      cart_sidebar:
+        checkout: "Validar el carrito"
+        close: "Cerrar"
       signed_in:
         profile: "Perfil"
       mobile_menu:
         cart: "Carrito"
-      joyride:
-        checkout: "Validar el carrito ahora"
-        already_ordered_products: "Pedido en este ciclo de pedido"
     register_call:
-      selling_on_ofn: "¿Quiere ser parte de Open Food Network (LaFeriaCR)?"
+      selling_on_ofn: "¿Tiene interés en vender a través de Open Food Network (LaFeriaCR)?"
       register: "Regístrarse aquí"
     footer:
       footer_secure: "Seguro y de confianza."
@@ -1171,12 +1172,12 @@ es_CR:
       footer_data_cookies_policy: "política de cookies"
   shop:
     messages:
-      login: "Ingresar"
-      signup: "Registrarse"
-      contact: "contactar"
-      require_customer_login: "Sólo los clientes aprobados pueden acceder a esta tienda."
-      require_login_html: "Si ya es un cliente aprobado, %{login} o %{signup} para continuar. ¿Quiere empezar a comprar aquí? Por favor, %{contact} %{enterprise} y pregunte acerca de participar."
-      require_customer_html: "Si desea comenzar a comprar aquí, por favor %{contact} %{enterprise} para preguntar acerca de incorporación."
+      customer_required:
+        login: "Ingresar"
+        signup: "Registrarse"
+        contact: "contactar"
+        require_customer_login: "Sólo los clientes aprobados pueden acceder a esta tienda."
+        require_customer_html: "Si desea comenzar a comprar aquí, por favor %{contact} %{enterprise} para preguntar acerca de incorporación."
   card_could_not_be_updated: La tarjeta no se pudo actualizar
   card_could_not_be_saved: la tarjeta no se pudo guardar
   spree_gateway_error_flash_for_checkout: "Hubo un problema con su información de pago: %{error}"
@@ -1534,11 +1535,14 @@ es_CR:
     one: Su pedido con <a href='%{path}' target='_blank'> %{shop} / %{order} </a> está abierto para revisión. Puede realizar cambios hasta %{oc_close}.
     other: 'Usted tiene <a href=''%{path}'' target=''_blank''> %{count} pedidos con %{shop} </a> actualmente abiertos para revisión. Puede realizar cambios hasta %{oc_close}. '
   orders_changeable_orders_alert_html: Este pedido ha sido confirmado, pero puede realizar cambios hasta <strong>%{oc_close}</strong>.
-  products_clear_all: Limpiar todo
+  products_clear: Limpiar
   products_showing: "Mostrando:"
-  products_or: "Ó"
+  products_or: "o"
+  products_and: "y"
   products_with: con
-  products_search: "Buscar por producto o productor"
+  products_filter_by: "Fitrar por"
+  products_filter_selected: "seleccionado"
+  products_filter_clear: "Limpiar"
   products_loading: "Cargando productos..."
   products_updating_cart: "Actualizando su carrito..."
   products_cart_empty: "Carrito vacío"
@@ -1688,8 +1692,7 @@ es_CR:
   password: Contraseña
   remember_me: Recordarme
   are_you_sure: "¿Está seguro?"
-  orders_open: Pedidos abiertos
-  closing: "Cerrando "
+  orders_open: "Pedidos abiertos"
   going_back_to_home_page: "Le estamos llevando de vuelta a la página de inicio"
   creating: Creando
   updating: Actualizando
@@ -2724,6 +2727,7 @@ es_CR:
   customer_details: "Detalles del cliente"
   adjustments: "Ajustes"
   payments: "Pagos"
+  return_authorizations: "Autorizaciones de devolución"
   payment: "Pago"
   payment_method: "Método de pago"
   shipment: "Envío"
@@ -2747,6 +2751,7 @@ es_CR:
   previous: "Anterior"
   last: "Último"
   spree:
+    more: "Más"
     your_order_is_empty_add_product: "Su pedido está vacío, busque y añada un producto arriba"
     add_product: "Añadir Producto"
     name_or_sku: "Nombre o código SKU (ingrese al menos los primeros 4 caracteres del nombre del producto)"
@@ -2793,6 +2798,8 @@ es_CR:
     new_payment: "Nuevo pago"
     capture: "Captura"
     void: "Vacío"
+    login: "Iniciar sesión"
+    password: "Contraseña"
     configurations: "Configuraciones"
     general_settings: "Configuración general"
     site_name: "Nombre del sitio"
@@ -2857,8 +2864,6 @@ es_CR:
     abbreviation: "Abreviatura"
     new_state: "Nueva provincia"
     payment_methods: "Métodos de pago"
-    new_payment_method: "Nuevo método de pago"
-    provider: "Proveedor"
     taxonomies: "Taxonomías"
     new_taxonomy: "Nueva taxonomía"
     back_to_taxonomies_list: "Volver a la lista de taxonomías"
@@ -3053,9 +3058,6 @@ es_CR:
           zone: "Zona"
           calculator: "Calculadora"
           display: "Mostrar"
-          both: "Ambos"
-          front_end: "Front End"
-          back_end: "Back End"
           no_shipping_methods_found: "No se encontraron métodos de envío"
         new:
           new_shipping_method: "Nuevo método de envío"
@@ -3067,14 +3069,24 @@ es_CR:
         form:
           categories: "Categorías"
           zones: "Zonas"
-          both: "Ambos"
-          front_end: "Front End"
-          back_end: "Back End"
       payment_methods:
+        index:
+          payment_methods: "Métodos de pago"
+          new_payment_method: "Nuevo método de pago"
+          name: "Nombre"
+          products_distributor: "Distribuidor"
+          provider: "Proveedor"
+          environment: "Ambiente"
+          display: "Mostrar"
+          active: "Activo"
+          both: "Ambos"
+          active_yes: "Sí"
+          active_no: "No"
         new:
           new_payment_method: "Nuevo método de pago"
           back_to_payment_methods_list: "Volver a la lista de métodos de pago"
         edit:
+          new: "Nuevo"
           editing_payment_method: "Edición del método de pago"
           back_to_payment_methods_list: "Volver a la lista de métodos de pago"
         stripe_connect:
@@ -3090,6 +3102,17 @@ es_CR:
           account_id: ID de cuenta
           business_name: Nombre de la organización
           charges_enabled: Cargos habilitados
+        form:
+          name: "Nombre"
+          description: "Descripción"
+          environment: "Ambiente"
+          display: "Mostrar"
+          active: "Activo"
+          active_yes: "Sí"
+          active_no: "No"
+          tags: "Etiquetas"
+        providers:
+          provider: "Proveedor"
       payments:
         source_forms:
           stripe:
@@ -3190,11 +3213,19 @@ es_CR:
           display_as: "Mostrar como"
           display_name: "Nombre para mostrar"
         autocomplete:
+          out_of_stock: "Agotado"
           producer_name: "Productor"
           unit: "Unidad"
       shared:
         sortable_header:
           name: "Nombre"
+          number: "Número"
+          state: "Provincia"
+          payment_state: "Estado del pago"
+          shipment_state: "Estado del envío"
+          email: "Correo electrónico"
+          total: "Total"
+      general_settings:
         edit:
           legal_settings: "Configuraciones legales"
           cookies_consent_banner_toggle: "Mostrar el banner de consentimiento de cookies"
@@ -3220,7 +3251,6 @@ es_CR:
       format: '%Y-%m-%d'
       js_format: 'yy-mm-dd'
     orders:
-      error_flash_for_unavailable_items: "Un artículo de su carrito ya no está disponible."
       edit:
         login_to_view_order: "Por favor inicie sesión para ver su pedido."
       bought:
@@ -3248,9 +3278,6 @@ es_CR:
       invalid: inválido
     order_mailer:
       cancel_email:
-        customer_greeting: "Hola %{name}!"
-        instructions: "Su pedido ha sido CANCELADO. Por favor, conserve esta información de cancelación para sus registros."
-        order_summary_canceled: "Resumen del pedido [CANCELADO]"
         subject: "Cancelación del pedido"
       confirm_email:
         subject: "Confirmación del pedido"

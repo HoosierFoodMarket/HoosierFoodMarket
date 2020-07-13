@@ -49,15 +49,16 @@ module OpenFoodNetwork
       when "tax_rates"
         orders.map do |order|
           [order.number, order.total - order.total_tax] +
-            relevant_rates.map { |rate| order.tax_adjustment_totals.fetch(rate, 0) } +
-            [order.total_tax, order.total]
+            relevant_rates.map { |rate|
+              OrderTaxAdjustmentsFetcher.new(order).totals.fetch(rate, 0)
+            } + [order.total_tax, order.total]
         end
       else
         orders.map do |order|
           totals = totals_of order.line_items
           shipping_cost = shipping_cost_for order
 
-          [order.number, order.created_at, totals[:items], totals[:items_total],
+          [order.number, order.completed_at.strftime("%F %T"), totals[:items], totals[:items_total],
            totals[:taxable_total], totals[:sales_tax], shipping_cost, order.shipping_tax, order.enterprise_fee_tax, order.total_tax,
            order.bill_address.full_name, order.distributor.andand.name]
         end
@@ -95,7 +96,7 @@ module OpenFoodNetwork
     end
 
     def shipping_cost_for(order)
-      shipping_cost = order.adjustments.find_by_label("Shipping").andand.amount
+      shipping_cost = order.adjustments.find_by(label: "Shipping").andand.amount
       shipping_cost.nil? ? 0.0 : shipping_cost
     end
 

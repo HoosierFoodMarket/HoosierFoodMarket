@@ -21,6 +21,8 @@ pt:
         base: "Cartão de Crédito"
       order_cycle:
         orders_close_at: Data de fecho
+      variant_override:
+        count_on_hand: "Disponível"
     errors:
       models:
         spree/user:
@@ -164,8 +166,7 @@ pt:
         title: Outra Falha (%{count} encomendas)
         explainer: 'O processamento automático destas encomendas falhou devido a uma razão desconhecida. Isto não deveria estar a acontecer, por favor contacte-nos se estiver a ver esta mensagem. '
   home: "OFN"
-  title: Open Food Network
-  welcome_to: 'Bem-vindo à'
+  title: "Open Food Network"
   site_meta_description: "Começamos a partir da terra. Com agricultores e produtores prontos a contarem as suas histórias com um brilho nos olhos. Com distribuidores prontos a estabelecerem ligações entre pessoas e produtos de forma justa e honesta. Com consumidores que acreditam que melhores decisões no momento da compra..."
   search_by_name: Procurar por nome ou localidade...
   producers_join: Produtores e produtoras de proximidade, estão convidados a juntarem-se à Open Food Network!
@@ -347,7 +348,6 @@ pt:
         title: "Configurações Matomo"
         matomo_url: "URL Matomo"
         matomo_site_id: "Site ID Matomo"
-        info_html: "Matomo é uma ferramenta de análise web e mobile. Pode instalar o Matomo no seu servidor ou utilizar um serviço na cloud. Veja <a href='http://matomo.org' target='_blank'>matomo.org</a> para mais informações."
         config_instructions_html: "Aqui pode configurar a integração com Matomo. O URL Matomo em baixo deve apontar para o serviror para onde a informação de tracking de utilizadores será enviada; se deixado vazio, o tracking de utilizadores através do Matomo ficará desactivado. O campo Site ID não é obrigatório mas útil se estive a fazer tracking de mais do que um website numa instância única do Matomo; pode ser encontrado na consola da instância Matomo."
     customers:
       index:
@@ -382,6 +382,7 @@ pt:
         footer_and_external_links: Rodapé e Ligações Externas
         your_content: O seu conteúdo
         user_guide: Manual do Utilizador
+        map: Mapa
     enterprise_fees:
       index:
         title: "Taxas de Organização"
@@ -655,12 +656,11 @@ pt:
           link_to_front: Link para a loja
           link_to_front_tip: Um link direto para a sua loja no Open Food Network.
         shipping_methods:
-          name: Nome
-          applies: Aplicável?
-          manage: Gerir Métodos de Envio
-          create_button: Criar Nova Forma de Envio
-          create_one_button: Criar um agora
-          no_method_yet: Ainda não tem nenhuma forma de envio.
+          name: "Nome"
+          manage: "Gerir Métodos de Envio"
+          create_button: "Criar Nova Forma de Envio"
+          create_one_button: "Criar um agora"
+          no_method_yet: "Ainda não tem nenhuma forma de envio."
         shop_preferences:
           shopfront_requires_login: "Loja visível publicamente?"
           shopfront_requires_login_tip: "Escolha se os consumidores vão precisar de fazer login para ver a loja, ou se esta estará visível para toda a gente."
@@ -1081,11 +1081,11 @@ pt:
       show_on_map: "Mostrar todas as lojas no mapa"
   shared:
     menu:
+      cart_sidebar:
+        checkout: "Finalizar compra"
+        close: "Fechar"
       signed_in:
         profile: "Perfil"
-      joyride:
-        checkout: "Finalizar compra agora"
-        already_ordered_products: "Já encomendado neste ciclo de encomendas"
     register_call:
       selling_on_ofn: "Tem interesse em participar na Open Food Network?"
       register: "Registe-se aqui"
@@ -1108,8 +1108,9 @@ pt:
       footer_data_cookies_policy: "política de cookies"
   shop:
     messages:
-      login: "Entrar"
-      contact: "contacto"
+      customer_required:
+        login: "Entrar"
+        contact: "contacto"
   card_could_not_be_updated: O cartão não pode ser actualizado
   card_could_not_be_saved: o cartão não pode ser guardado
   spree_gateway_error_flash_for_checkout: "Houve um problema com a sua informação de pagamento: %{error}"
@@ -1465,11 +1466,13 @@ pt:
     one: Tem encomendas com actualmente abertas para revisão. Pode fazer alterações até .
     other: 'Tem <a href=''%{path}'' target=''_blank''>%{count}encomendas com %{shop}</a> actualmente abertas para revisão. Pode fazer alterações até %{oc_close}. '
   orders_changeable_orders_alert_html: Esta encomenda está confirmada, mas pode fazer alterações até <strong>%{oc_close}</strong>.
-  products_clear_all: Limpar tudo
+  products_clear: Limpar
   products_showing: "Mostrando:"
-  products_or: "OU"
+  products_or: "ou"
   products_with: com
-  products_search: "Procurar por produto ou produtor"
+  products_filter_by: "Filtrar por"
+  products_filter_selected: "selecionado"
+  products_filter_clear: "Limpar"
   products_loading: "Carregando produtos..."
   products_updating_cart: "Atualizando carrinho..."
   products_cart_empty: "Carrinho vazio"
@@ -1619,8 +1622,7 @@ pt:
   password: Palavra-passe
   remember_me: Lembrar meu login
   are_you_sure: "Tem a certeza?"
-  orders_open: Encomendas abertas
-  closing: "Fechando"
+  orders_open: "Encomendas abertas"
   going_back_to_home_page: "Voltando à pagina inicial"
   creating: Criando
   updating: Atualizando
@@ -2578,6 +2580,7 @@ pt:
   previous: "Anterior"
   last: "Último"
   spree:
+    more: "Mais"
     your_order_is_empty_add_product: "A sua encomenda está vazia, por favor procure e adicione um produto em cima"
     add_product: "Adicionar Produto"
     name_or_sku: "Nome ou Código (insira pelo menos 4 caracteres)"
@@ -2621,6 +2624,8 @@ pt:
     fill_in_customer_info: "Por favor preencha informação do/a consumidor/a"
     new_payment: "Novo Pagamento"
     capture: "Capturar"
+    login: "Entrar"
+    password: "Palavra-passe"
     configurations: "Configurações"
     general_settings: "Configurações Gerais"
     site_name: "Nome do Site"
@@ -2685,8 +2690,6 @@ pt:
     abbreviation: "Abreviatura"
     new_state: "Nova Região"
     payment_methods: "Métodos de pagamento"
-    new_payment_method: "Novo Método de Pagamento"
-    provider: "Fornecedor"
     taxonomies: "Taxonomias"
     new_taxonomy: "Nova Taxonomia"
     back_to_taxonomies_list: "Voltar à Lista de Taxonomias"
@@ -2835,10 +2838,22 @@ pt:
         form:
           zones: "Zonas"
       payment_methods:
+        index:
+          payment_methods: "Métodos de pagamento"
+          new_payment_method: "Novo Método de Pagamento"
+          name: "Nome"
+          products_distributor: "Distribuidor"
+          provider: "Fornecedor"
+          environment: "Ambiente"
+          display: "Mostrar"
+          active: "Ativo"
+          active_yes: "Sim"
+          active_no: "Não"
         new:
           new_payment_method: "Novo Método de Pagamento"
           back_to_payment_methods_list: "Voltar à Lista de Métodos de Pagamento"
         edit:
+          new: "Novo"
           editing_payment_method: "Editar Método de Pagamento"
           back_to_payment_methods_list: "Voltar à Lista de Métodos de Pagamento"
         stripe_connect:
@@ -2854,6 +2869,17 @@ pt:
           account_id: ID de Conta
           business_name: Nome do Negócio
           charges_enabled: Taxas activas
+        form:
+          name: "Nome"
+          description: "Descrição"
+          environment: "Ambiente"
+          display: "Mostrar"
+          active: "Ativo"
+          active_yes: "Sim"
+          active_no: "Não"
+          tags: "Etiquetas"
+        providers:
+          provider: "Fornecedor"
       payments:
         source_forms:
           stripe:
@@ -2941,11 +2967,19 @@ pt:
           price: "Preço"
           display_as: "Mostrar como"
         autocomplete:
+          out_of_stock: "Sem Stock"
           producer_name: "Produtor"
           unit: "Unidade"
       shared:
         sortable_header:
           name: "Nome"
+          number: "Número"
+          state: "Estado"
+          payment_state: "Estado do Pagamento"
+          shipment_state: "Estado do envio"
+          email: "Email"
+          total: "Total"
+      general_settings:
         edit:
           legal_settings: "Configurações Legais"
           cookies_consent_banner_toggle: "Mostrar o Banner de consentimento de Cookies"
@@ -2971,7 +3005,6 @@ pt:
       format: '%Y-%m-%d'
       js_format: 'aa-mm-dd'
     orders:
-      error_flash_for_unavailable_items: "Um item do seu carrinho ficou indisponível."
       edit:
         login_to_view_order: "Por favor faça login para ver a sua encomenda."
       bought:
@@ -2999,9 +3032,6 @@ pt:
       invalid: inválido
     order_mailer:
       cancel_email:
-        customer_greeting: "Olá %{name}!"
-        instructions: "A sua encomenda foi cancelada. Para seu registo, por favor guarde esta informação de cancelamento."
-        order_summary_canceled: "Sumário de Encomenda [CANCELADA]"
         subject: "Cancelamento de Encomenda"
       confirm_email:
         subject: "Confimação de Encomenda"

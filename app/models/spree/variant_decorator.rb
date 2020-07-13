@@ -16,8 +16,6 @@ Spree::Variant.class_eval do
   has_many :variant_overrides
   has_many :inventory_items
 
-  attr_accessible :unit_value, :unit_description, :images_attributes,
-                  :display_as, :display_name, :import_date
   accepts_nested_attributes_for :images
 
   validates :unit_value, presence: true, if: ->(variant) {
@@ -92,9 +90,7 @@ Spree::Variant.class_eval do
   end
 
   def self.indexed
-    Hash[
-      scoped.map { |v| [v.id, v] }
-    ]
+    scoped.index_by(&:id)
   end
 
   def self.active(currency = nil)

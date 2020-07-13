@@ -2,11 +2,11 @@ module Spree
   module Admin
     class SearchController < Spree::Admin::BaseController
       # http://spreecommerce.com/blog/2010/11/02/json-hijacking-vulnerability/
-      before_filter :check_json_authenticity, only: :index
+      before_action :check_json_authenticity, only: :index
       respond_to :json
 
       def known_users
-        @users = if exact_match = Spree.user_class.find_by_email(params[:q])
+        @users = if exact_match = Spree.user_class.find_by(email: params[:q])
                    [exact_match]
                  else
                    spree_current_user.known_users.ransack(ransack_hash).result.limit(10)

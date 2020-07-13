@@ -12,7 +12,7 @@ describe 'Products service', ->
   productWithImage = null
   properties = null
   taxons = null
-  Geo = {}
+  GmapsGeo = {}
   endpoint = "/api/order_cycles/1/products?distributor=1"
 
   beforeEach ->
@@ -53,7 +53,7 @@ describe 'Products service', ->
       $provide.value "currentOrder", currentOrder
       $provide.value "taxons", taxons
       $provide.value "properties", properties
-      $provide.value "Geo", Geo
+      $provide.value "GmapsGeo", GmapsGeo
       $provide.value "OrderCycle", OrderCycle
       $provide.value "railsFlash", null
       null
@@ -107,7 +107,7 @@ describe 'Products service', ->
     $httpBackend.expectGET(endpoint).respond([product])
     $httpBackend.flush()
     expect(Products.products[0].primaryImage).toBeUndefined()
-    expect(Products.products[0].primaryImageOrMissing).toEqual "/assets/noimage/small.png"
+    expect(Products.products[0].primaryImageOrMissing).toEqual "/noimage/small.png"
 
   it "sets largeImage", ->
     $httpBackend.expectGET(endpoint).respond([productWithImage])

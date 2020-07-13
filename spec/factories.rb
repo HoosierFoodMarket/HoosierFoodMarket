@@ -28,16 +28,23 @@ FactoryBot.define do
 
   factory :schedule, class: Schedule do
     sequence(:name) { |n| "Schedule #{n}" }
-    order_cycles { [OrderCycle.first || FactoryBot.create(:simple_order_cycle)] }
+
+    transient do
+      order_cycles { [OrderCycle.first || create(:simple_order_cycle)] }
+    end
+
+    before(:create) do |schedule, evaluator|
+      evaluator.order_cycles.each do |order_cycle|
+        order_cycle.schedules << schedule
+      end
+    end
   end
 
   factory :proxy_order, class: ProxyOrder do
     subscription
     order_cycle { subscription.order_cycles.first }
     before(:create) do |proxy_order, _proxy|
-      if proxy_order.order
-        proxy_order.order.update_attribute(:order_cycle_id, proxy_order.order_cycle_id)
-      end
+      proxy_order.order&.update_attribute(:order_cycle_id, proxy_order.order_cycle_id)
     end
   end
 
@@ -124,7 +131,7 @@ FactoryBot.define do
     default_tax true
 
     after(:create) do |zone|
-      Spree::ZoneMember.create!(zone: zone, zoneable: Spree::Country.find_by_name('Australia'))
+      Spree::ZoneMember.create!(zone: zone, zoneable: Spree::Country.find_by(name: 'Australia'))
     end
   end
 
@@ -171,8 +178,12 @@ end
 
 FactoryBot.modify do
   factory :address do
-    state { Spree::State.find_by_name 'Victoria' }
-    country { Spree::Country.find_by_name 'Australia' || Spree::Country.first }
+    state { Spree::State.find_by name: 'Victoria' }
+    country { Spree::Country.find_by name: 'Australia' || Spree::Country.first }
+  end
+
+  factory :credit_card do
+    cc_type 'visa'
   end
 
   factory :payment do

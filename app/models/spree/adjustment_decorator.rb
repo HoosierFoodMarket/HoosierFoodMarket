@@ -9,8 +9,8 @@ module Spree
     # So we don't need the option `dependent: :destroy` as long as
     # AdjustmentMetadata has no destroy logic itself.
     has_one :metadata, class_name: 'AdjustmentMetadata'
-    belongs_to :tax_rate, foreign_key: 'originator_id',
-                          conditions: "spree_adjustments.originator_type = 'Spree::TaxRate'"
+    belongs_to :tax_rate, -> { where spree_adjustments: { originator_type: 'Spree::TaxRate' } },
+               foreign_key: 'originator_id'
 
     scope :enterprise_fee, -> { where(originator_type: 'EnterpriseFee') }
     scope :admin,          -> { where(source_type: nil, originator_type: nil) }
@@ -18,13 +18,11 @@ module Spree
       where(originator_type: 'Spree::TaxRate', adjustable_type: 'Spree::LineItem')
     }
 
-    scope :with_tax,       -> { where('spree_adjustments.included_tax > 0') }
+    scope :with_tax,       -> { where('spree_adjustments.included_tax <> 0') }
     scope :without_tax,    -> { where('spree_adjustments.included_tax = 0') }
     scope :payment_fee,    -> { where(AdjustmentScopes::PAYMENT_FEE_SCOPE) }
     scope :shipping,       -> { where(AdjustmentScopes::SHIPPING_SCOPE) }
     scope :eligible,       -> { where(AdjustmentScopes::ELIGIBLE_SCOPE) }
-
-    attr_accessible :included_tax
 
     localize_number :amount
 
@@ -34,7 +32,11 @@ module Spree
     end
 
     def set_absolute_included_tax!(tax)
+      # This rubocop issue can only be fixed when Adjustment#update! is brought from Spree to OFN
+      #   and renamed to something else, then AR's update! can be used instead of update_attributes!
+      # rubocop:disable Rails/ActiveRecordAliases
       update_attributes! included_tax: tax.round(2)
+      # rubocop:enable Rails/ActiveRecordAliases
     end
 
     def display_included_tax

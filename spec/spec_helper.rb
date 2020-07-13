@@ -24,6 +24,14 @@ require 'paper_trail/frameworks/rspec'
 
 require 'webdrivers'
 
+require 'shoulda/matchers'
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
+
 # Allow connections to phantomjs/selenium whilst raising errors
 # when connecting to external sites
 require 'webmock/rspec'
@@ -35,8 +43,7 @@ WebMock.disable_net_connect!(
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
-require 'spree/testing_support/controller_requests'
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 require 'spree/testing_support/capybara_ext'
 require 'spree/api/testing_support/setup'
 require 'spree/testing_support/authorization_helpers'
@@ -108,7 +115,7 @@ RSpec.configure do |config|
     RackRequestBlocker.wait_for_requests_complete
   end
 
-  def restart_phantomjs
+  def restart_driver
     Capybara.send('session_pool').values
       .select { |s| s.driver.is_a?(Capybara::Selenium::Driver) }
       .each { |s| s.driver.reset! }
@@ -123,7 +130,7 @@ RSpec.configure do |config|
     ActionController::Base.perform_caching = caching
   end
 
-  config.before(:all) { restart_phantomjs }
+  config.before(:all) { restart_driver }
 
   # Geocoding
   config.before(:each) { allow_any_instance_of(Spree::Address).to receive(:geocode).and_return([1, 1]) }
@@ -148,8 +155,8 @@ RSpec.configure do |config|
   config.include Spree::UrlHelpers
   config.include Spree::CheckoutHelpers
   config.include Spree::MoneyHelper
-  config.include Spree::TestingSupport::ControllerRequests, type: :controller
   config.include Spree::TestingSupport::Preferences
+  config.include ControllerRequestsHelper, type: :controller
   config.include Devise::TestHelpers, type: :controller
   config.extend  Spree::Api::TestingSupport::Setup, type: :controller
   config.include OpenFoodNetwork::ApiHelper, type: :controller

@@ -4,7 +4,7 @@ module Api
     include ApiActionCaching
 
     skip_authorization_check
-    skip_before_filter :authenticate_user, :ensure_api_key, only: [:taxons, :properties]
+    skip_before_action :authenticate_user, :ensure_api_key, only: [:taxons, :properties]
 
     caches_action :taxons, :properties,
                   expires_in: CacheService::FILTERS_EXPIRY,
@@ -81,11 +81,11 @@ module Api
     end
 
     def distributor
-      @distributor ||= Enterprise.find_by_id(params[:distributor])
+      @distributor ||= Enterprise.find_by(id: params[:distributor])
     end
 
     def order_cycle
-      @order_cycle ||= OrderCycle.find_by_id(params[:id])
+      @order_cycle ||= OrderCycle.find_by(id: params[:id])
     end
 
     def customer
