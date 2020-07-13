@@ -1,5 +1,5 @@
-[![Build Status](https://semaphoreci.com/api/v1/openfoodfoundation/openfoodnetwork-2/branches/master/badge.svg)](https://semaphoreci.com/openfoodfoundation/openfoodnetwork-2)
-[![Code Climate](https://codeclimate.com/github/openfoodfoundation/openfoodnetwork.png)](https://codeclimate.com/github/openfoodfoundation/openfoodnetwork)
+# Hoosier Food Market
+Hoosier Food Market is a white-label fork of the Open Food Network, focused on growers, sellers, and buyers in Indiana.
 
 # Open Food Network
 
